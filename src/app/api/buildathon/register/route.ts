@@ -89,12 +89,12 @@ async function assertGithubRepoHasNoPreBuildathonActivity(repoUrl: string) {
   }
 
   // We allow repos to be created before the buildathon start date,
-  // as long as they have no commits before that date.
-  // This enables pre-registration with empty repos.
+  // and allow boilerplate commits (README, LICENSE, .gitignore only).
+  // This enables pre-registration with placeholder repos.
 
   // Check commits strictly before start.
   const commitsRes = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/commits?per_page=1&until=${encodeURIComponent(beforeStartAtIso)}`,
+    `https://api.github.com/repos/${owner}/${repo}/commits?per_page=100&until=${encodeURIComponent(beforeStartAtIso)}`,
     { headers: githubHeaders(), cache: "no-store" },
   );
 
@@ -105,11 +105,52 @@ async function assertGithubRepoHasNoPreBuildathonActivity(repoUrl: string) {
     );
   }
 
-  const commitsJson = (await commitsRes.json()) as unknown;
-  if (Array.isArray(commitsJson) && commitsJson.length > 0) {
-    throw new Error(
-      `GitHub repos should have no activity before the buildathon start date (${startAt.toISOString().slice(0, 10)}).`,
+  const commitsJson = (await commitsRes.json()) as Array<{ sha: string }>;
+  if (!Array.isArray(commitsJson)) {
+    throw new Error("Could not verify GitHub repo commit history. Please try again later.");
+  }
+
+  // Allowed boilerplate files that can exist in pre-buildathon commits
+  const ALLOWED_FILES = new Set([
+    "README.md",
+    "README",
+    "readme.md",
+    "readme",
+    "LICENSE",
+    "LICENSE.md",
+    "LICENSE.txt",
+    "license",
+    "license.md",
+    "license.txt",
+    ".gitignore",
+    ".gitattributes",
+  ]);
+
+  // Check each commit before the start date
+  for (const commit of commitsJson) {
+    const commitDetailRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/commits/${commit.sha}`,
+      { headers: githubHeaders(), cache: "no-store" },
     );
+
+    if (!commitDetailRes.ok) continue;
+
+    const commitDetail = (await commitDetailRes.json()) as {
+      files?: Array<{ filename: string }>;
+    };
+
+    const files = commitDetail.files || [];
+
+    // Check if any file is NOT in the allowed list
+    const hasDisallowedFiles = files.some(
+      (file) => !ALLOWED_FILES.has(file.filename),
+    );
+
+    if (hasDisallowedFiles) {
+      throw new Error(
+        `GitHub repos should have no code before the buildathon start date (${startAt.toISOString().slice(0, 10)}). Only README, LICENSE, and .gitignore files are allowed.`,
+      );
+    }
   }
 }
 
