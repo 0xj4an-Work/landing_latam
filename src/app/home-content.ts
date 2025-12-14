@@ -86,6 +86,14 @@ export const HIGHLIGHTS = [
   icon: HighlightIconKey;
 }>;
 
+export const COMMUNITIES = [
+  { name: "Celo Mexico", url: "https://celo.mx" },
+  { name: "Celo Colombia", url: "https://celocolombia.org" },
+  { name: "CeLatam", url: "https://celatam.org" },
+  { name: "Celo Brazil", url: null },
+  { name: "Celo Argentina", url: null },
+] as const;
+
 export const FAQ = [
   {
     question: "Who can participate?",
@@ -115,11 +123,6 @@ export const FAQ = [
     question: "How do submissions work?",
     answer:
       "Submit via a form with your Karma Gap project link. Your Karma Gap project should include your GitHub repo, deck, and demo.",
-  },
-  {
-    question: "How does dark mode work here?",
-    answer:
-      "This site uses next-themes. The theme toggle sets a class on <html> (dark/light/system) and Tailwind styles follow it.",
   },
 ] as const satisfies ReadonlyArray<FaqItem>;
 

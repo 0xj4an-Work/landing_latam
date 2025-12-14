@@ -32,15 +32,15 @@ export function SectionHeader({
   return (
     <div className={cn("max-w-2xl", className)}>
       {eyebrow ? (
-        <div className="text-sm font-medium tracking-wide text-[color:var(--celo-muted)]">
+        <div className="text-sm font-semibold uppercase tracking-wider text-[color:var(--celo-muted)]">
           {eyebrow}
         </div>
       ) : null}
-      <h2 className="mt-3 text-balance text-3xl font-title font-[200] tracking-tight sm:text-4xl">
+      <h2 className="mt-3 text-balance text-3xl font-title font-[200] leading-[1.15] tracking-tight sm:text-4xl">
         {title}
       </h2>
       {description ? (
-        <p className="mt-4 text-pretty text-base leading-7 text-black/70 dark:text-white/70">
+        <p className="mt-5 text-pretty text-base leading-[1.75] text-black/70 dark:text-white/70">
           {description}
         </p>
       ) : null}
