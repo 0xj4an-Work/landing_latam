@@ -14,7 +14,7 @@ export function Section({
   ...props
 }: React.ComponentPropsWithoutRef<"section">) {
   return (
-    <section className={cn("py-16 sm:py-20", className)} {...props} />
+    <section className={cn("py-4 sm:py-6", className)} {...props} />
   );
 }
 

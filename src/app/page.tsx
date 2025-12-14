@@ -13,7 +13,6 @@ import {
   Card,
   ChecklistItem,
   MobileNav,
-  PrizeCard,
   RuleItem,
   Stat,
 } from "@/components/home/home-ui";
@@ -79,8 +78,8 @@ export default function Home() {
           <Container>
             <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-7">
-                <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/60 px-3 py-1 text-xs font-medium text-black/70 dark:border-white/15 dark:bg-white/[0.03] dark:text-white/70">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/60 px-4 py-2 text-sm font-medium text-black/70 dark:border-white/15 dark:bg-white/[0.03] dark:text-white/70">
+                  <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                   Pre-registrations: Dec 15 → Jan 16
                 </div>
                 <h1 className="mt-5 text-balance text-4xl font-title font-[200] tracking-tight sm:text-6xl">
@@ -110,9 +109,45 @@ export default function Home() {
                   <Stat label="Winners" value="Mar 6" />
                   <Stat label="Region" value="LATAM" />
                 </div>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  <Stat label="1st place" value="$1,000" />
+                  <Stat label="2nd place" value="$500" />
+                  <Stat label="3rd place" value="$250" />
+                </div>
               </div>
 
-              <div className="lg:col-span-5">
+              <div className="lg:col-span-5 space-y-4">
+                <Card className="rounded-2xl p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-sm font-semibold">Designed for shipping</div>
+                      <p className="mt-1 text-sm text-black/70 dark:text-white/70">
+                        Clear milestones, strong feedback loops, and a community that pushes you to finish.
+                      </p>
+                    </div>
+                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-foreground text-background">
+                      <LightningBoltIcon className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 grid-cols-2">
+                    {HIGHLIGHTS.map((h) => (
+                      <div key={h.title} className="flex items-start gap-2">
+                        <div className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-black/[0.05] text-foreground dark:bg-white/[0.08]">
+                          {iconByKey[h.icon]}
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold">{h.title}</div>
+                          <p className="mt-0.5 text-xs leading-5 text-black/70 dark:text-white/70">
+                            {h.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
                 <Card className="rounded-2xl p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -146,46 +181,6 @@ export default function Home() {
                   </div>
                 </Card>
               </div>
-            </div>
-          </Container>
-        </Section>
-
-        <Section id="prizes" className="scroll-mt-20">
-          <Container>
-            <SectionHeader
-              title="Rewards for shipping and storytelling."
-              description="Top teams win cash + credits from our sponsors."
-            />
-
-            <div className="mt-10 grid gap-4 lg:grid-cols-3">
-              <PrizeCard place="1st" title="$1,000" subtitle="Cash + ThirWeb Credits + Noah AI Credits" />
-              <PrizeCard place="2nd" title="$500" subtitle="Cash + ThirWeb Credits + Noah AI Credits" />
-              <PrizeCard place="3rd" title="$250" subtitle="Cash + ThirWeb Credits + Noah AI Credits" />
-            </div>
-          </Container>
-        </Section>
-
-        <Section>
-          <Container>
-            <SectionHeader
-              title="A buildathon designed for shipping."
-              description="Clear milestones, strong feedback loops, and a community that pushes you to finish."
-            />
-
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {HIGHLIGHTS.map((h) => (
-                <Card key={h.title} className="p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-black/[0.05] text-foreground dark:bg-white/[0.08]">
-                      {iconByKey[h.icon]}
-                    </div>
-                    <div className="text-sm font-semibold">{h.title}</div>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-black/70 dark:text-white/70">
-                    {h.description}
-                  </p>
-                </Card>
-              ))}
             </div>
           </Container>
         </Section>
