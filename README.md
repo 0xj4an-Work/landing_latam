@@ -21,6 +21,8 @@ pnpm dev
 bun dev
 ```
 
+If you are setting up the database locally, see `DATABASE_SETUP.md`.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
