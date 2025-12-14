@@ -244,8 +244,9 @@ export default function Home() {
                 </li>
                 <li>
                   <RuleItem>
-                    GitHub repos should have <span className="font-medium">no activity</span> before the
+                    GitHub repos should have <span className="font-medium">no code</span> before the
                     buildathon start date (<span className="font-medium">2026-01-19</span>).
+                    Only README, LICENSE, and .gitignore files are allowed.
                   </RuleItem>
                 </li>
               </ul>

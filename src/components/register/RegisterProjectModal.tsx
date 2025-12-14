@@ -121,7 +121,7 @@ export default function RegisterProjectModal({
                 placeholder="https://github.com/user/project"
               />
               <p className="mt-2 text-xs text-black/60 dark:text-white/60">
-                Rule: GitHub repos should have no activity before the buildathon start date (2026-01-19).
+                Rule: GitHub repos should have no code before the buildathon start date (2026-01-19). Only README, LICENSE, and .gitignore files are allowed.
               </p>
             </Field>
 
