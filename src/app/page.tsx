@@ -529,7 +529,9 @@ export default function Home() {
                               <CheckIcon className="h-4 w-4" />
                             </span>
                           ) : (
-                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/10 text-black/40 dark:border-white/15 dark:text-white/40" />
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/10 text-[11px] font-semibold text-black/50 dark:border-white/15 dark:text-white/55">
+                              ?
+                            </span>
                           )
                         ) : null}
                         <span className={milestoneStatusLoading ? "opacity-80" : undefined}>
