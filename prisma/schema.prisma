@@ -26,6 +26,7 @@ model TeamMember {
   teamId       String
   memberName   String
   memberGithub String?
+  country      String?
   team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@index([teamId])

@@ -36,6 +36,12 @@ interface SquaresProps {
   borderColor?: CanvasFillStyle;
   squareSize?: number;
   hoverFillColor?: CanvasFillStyle;
+  /**
+   * Where to attach pointer listeners for hover detection.
+   * - window: best for full-screen / background effects (default).
+   * - element: best for small regions like buttons (avoids global listeners per instance).
+   */
+  interaction?: "window" | "element";
   className?: string;
 }
 
@@ -50,6 +56,7 @@ function Squares({
   borderColor = "var(--grid-border-color)",
   squareSize = 40,
   hoverFillColor = "var(--grid-hover-color)",
+  interaction = "window",
   className,
 }: SquaresProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -160,17 +167,22 @@ function Squares({
     updateSize();
     requestRef.current = requestAnimationFrame(render);
 
+    const target: Window | HTMLElement =
+      interaction === "element"
+        ? (canvas.parentElement?.parentElement ?? canvas.parentElement ?? canvas)
+        : window;
+
     window.addEventListener("resize", updateSize);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
+    target.addEventListener("mousemove", handleMouseMove as EventListener);
+    target.addEventListener("mouseleave", handleMouseLeave as EventListener);
 
     return () => {
       window.removeEventListener("resize", updateSize);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseleave", handleMouseLeave);
+      target.removeEventListener("mousemove", handleMouseMove as EventListener);
+      target.removeEventListener("mouseleave", handleMouseLeave as EventListener);
       if (requestRef.current !== null) cancelAnimationFrame(requestRef.current);
     };
-  }, [borderColor, direction, hoverFillColor, speed, squareSize]);
+  }, [borderColor, direction, hoverFillColor, interaction, speed, squareSize]);
 
   return (
     <div

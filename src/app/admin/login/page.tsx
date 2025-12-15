@@ -16,3 +16,4 @@ export default function AdminLoginPage({
   return <LoginForm nextPath={next} />;
 }
 
+

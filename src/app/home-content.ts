@@ -98,9 +98,9 @@ export const HIGHLIGHTS = [
 export const COMMUNITIES = [
   { name: "Celo Mexico", url: "https://celo.mx" },
   { name: "Celo Colombia", url: "https://celocolombia.org" },
-  { name: "CeLatam", url: "https://celatam.org" },
   { name: "Celo Brazil", url: null },
   { name: "Celo Argentina", url: null },
+  { name: "CeLatam", url: "https://celatam.org" },
 ] as const;
 
 export const FAQ = [

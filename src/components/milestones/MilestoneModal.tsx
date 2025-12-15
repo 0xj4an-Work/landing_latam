@@ -207,7 +207,7 @@ export function MilestoneModal({
       }
       const data = (await response.json()) as { teams?: Team[] };
       setTeams(data.teams || []);
-    } catch (err) {
+    } catch {
       // Silently fail if database is not available (frontend-only development)
       setTeams([]);
     } finally {

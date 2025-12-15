@@ -20,13 +20,38 @@ interface RegisterProjectModalProps {
 
 type Status = "idle" | "loading" | "success" | "error";
 
+const LATIN_AMERICAN_COUNTRIES = [
+  "Non Latin America Country",
+  "Argentina",
+  "Belize",
+  "Bolivia",
+  "Brazil",
+  "Chile",
+  "Colombia",
+  "Costa Rica",
+  "Cuba",
+  "Dominican Republic",
+  "Ecuador",
+  "El Salvador",
+  "Guatemala",
+  "Honduras",
+  "Mexico",
+  "Nicaragua",
+  "Panama",
+  "Paraguay",
+  "Peru",
+  "Puerto Rico",
+  "Uruguay",
+  "Venezuela",
+] as const;
+
 export default function RegisterProjectModal({
   open,
   onOpenChange,
 }: RegisterProjectModalProps) {
   const [teamName, setTeamName] = React.useState("");
-  const [members, setMembers] = React.useState<Array<{ memberName: string; memberGithub: string }>>([
-    { memberName: "", memberGithub: "" },
+  const [members, setMembers] = React.useState<Array<{ memberName: string; memberGithub: string; country: string }>>([
+    { memberName: "", memberGithub: "", country: "" },
   ]);
   const [status, setStatus] = React.useState<Status>("idle");
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
@@ -47,11 +72,13 @@ export default function RegisterProjectModal({
           .map((m) => ({
             memberName: m.memberName.trim(),
             memberGithub: m.memberGithub.trim(),
+            country: m.country.trim(),
           }))
           .filter((m) => m.memberName.length > 0)
           .map((m) => ({
             memberName: m.memberName,
             ...(m.memberGithub ? { memberGithub: m.memberGithub.replace(/^@/, "") } : {}),
+            ...(m.country ? { country: m.country } : {}),
           })),
       };
 
@@ -67,6 +94,14 @@ export default function RegisterProjectModal({
         return;
       }
 
+      // Check if all members have a country selected
+      const membersWithoutCountry = payload.members.filter((m) => !m.country);
+      if (membersWithoutCountry.length > 0) {
+        setStatus("error");
+        setErrorMessage("Please select a country for all team members.");
+        return;
+      }
+
       const res = await fetch("/api/buildathon/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,7 +111,7 @@ export default function RegisterProjectModal({
       if (res.ok) {
         setStatus("success");
         setTeamName("");
-        setMembers([{ memberName: "", memberGithub: "" }]);
+        setMembers([{ memberName: "", memberGithub: "", country: "" }]);
         onOpenChange(false);
         setShowSuccessModal(true);
         setStatus("idle");
@@ -122,39 +157,64 @@ export default function RegisterProjectModal({
               <div className="space-y-4">
                 {members.map((m, idx) => (
                   <div key={idx} className="rounded-lg border border-black/10 p-3 dark:border-white/15">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-black/70 dark:text-white/70">
-                          Name *
-                        </label>
-                        <input
-                          type="text"
-                          required={idx === 0}
-                          value={m.memberName}
-                          onChange={(e) => {
-                            const next = members.slice();
-                            next[idx] = { ...next[idx], memberName: e.target.value };
-                            setMembers(next);
-                          }}
-                          className={inputClassName}
-                          placeholder="Jane Doe"
-                        />
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-black/70 dark:text-white/70">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            required={idx === 0}
+                            value={m.memberName}
+                            onChange={(e) => {
+                              const next = members.slice();
+                              next[idx] = { ...next[idx], memberName: e.target.value };
+                              setMembers(next);
+                            }}
+                            className={inputClassName}
+                            placeholder="Jane Doe"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-black/70 dark:text-white/70">
+                            GitHub (optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={m.memberGithub}
+                            onChange={(e) => {
+                              const next = members.slice();
+                              next[idx] = { ...next[idx], memberGithub: e.target.value };
+                              setMembers(next);
+                            }}
+                            className={inputClassName}
+                            placeholder="@username"
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="mb-1 block text-xs font-medium text-black/70 dark:text-white/70">
-                          GitHub (optional)
+                          Country *
                         </label>
-                        <input
-                          type="text"
-                          value={m.memberGithub}
+                        <select
+                          value={m.country}
                           onChange={(e) => {
                             const next = members.slice();
-                            next[idx] = { ...next[idx], memberGithub: e.target.value };
+                            next[idx] = { ...next[idx], country: e.target.value };
                             setMembers(next);
                           }}
                           className={inputClassName}
-                          placeholder="@username"
-                        />
+                          disabled={status === "loading"}
+                          required={idx === 0 || m.memberName.trim().length > 0}
+                        >
+                          <option value="">Select a country...</option>
+                          {LATIN_AMERICAN_COUNTRIES.map((country) => (
+                            <option key={country} value={country}>
+                              {country}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
 
@@ -177,7 +237,7 @@ export default function RegisterProjectModal({
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setMembers([...members, { memberName: "", memberGithub: "" }])}
+                  onClick={() => setMembers([...members, { memberName: "", memberGithub: "", country: "" }])}
                   disabled={status === "loading"}
                   className="w-full"
                 >

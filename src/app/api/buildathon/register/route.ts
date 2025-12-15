@@ -6,6 +6,7 @@ export const runtime = "nodejs";
 type TeamMember = {
   memberName: string;
   memberGithub?: string;
+  country?: string;
 };
 
 type RegisterPayload = {
@@ -43,12 +44,22 @@ export async function POST(req: Request) {
     .map((m) => ({
       memberName: typeof m.memberName === "string" ? m.memberName.trim() : "",
       memberGithub: typeof m.memberGithub === "string" ? m.memberGithub.trim() : "",
+      country: typeof m.country === "string" ? m.country.trim() : "",
     }))
     .filter((m) => m.memberName);
 
   if (validMembers.length === 0) {
     return NextResponse.json(
       { error: "At least one team member with a name is required" },
+      { status: 400 },
+    );
+  }
+
+  // Check if all members have a country
+  const membersWithoutCountry = validMembers.filter((m) => !m.country);
+  if (membersWithoutCountry.length > 0) {
+    return NextResponse.json(
+      { error: "Country is required for all team members" },
       { status: 400 },
     );
   }
@@ -62,6 +73,7 @@ export async function POST(req: Request) {
           create: validMembers.map((m) => ({
             memberName: m.memberName,
             memberGithub: m.memberGithub || null,
+            country: m.country || null,
           })),
         },
       },

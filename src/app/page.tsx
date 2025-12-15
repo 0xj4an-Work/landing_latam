@@ -24,6 +24,7 @@ import {
 } from "@/components/home/home-ui";
 import Squares from "@/components/home/Squares";
 import { ButtonLink } from "@/components/ui/button";
+import { SquaresButtonLink } from "@/components/ui/squares-button-link";
 import { cn } from "@/lib/cn";
 import {
   COMMUNITIES,
@@ -71,7 +72,7 @@ export default function Home() {
       const json = (await res.json()) as { teams?: Team[]; error?: string };
       if (!res.ok) throw new Error(json.error || "Failed to fetch teams");
       setMilestoneTeams(json.teams || []);
-    } catch (err) {
+    } catch {
       // Silently fail if database is not available (frontend-only development)
       setMilestoneTeams([]);
     }
@@ -259,11 +260,12 @@ export default function Home() {
                     <RegisterButton
                       label="Apply now"
                       variant="primary"
+                      withSquares
                       className="shadow-lg shadow-[var(--celo-yellow)]/20"
                     />
-                    <ButtonLink variant="secondary" href="#schedule">
+                    <SquaresButtonLink variant="secondary" href="#schedule">
                       View schedule
-                    </ButtonLink>
+                    </SquaresButtonLink>
                     <ButtonLink
                       variant="ghost"
                       href={INFO.discordUrl}
@@ -383,16 +385,16 @@ export default function Home() {
                   </div>
 
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <ButtonLink className="w-full sm:w-auto" href={INFO.applyUrl}>
+                    <SquaresButtonLink className="w-full sm:w-auto" href={INFO.applyUrl}>
                       Get started
-                    </ButtonLink>
-                    <ButtonLink
+                    </SquaresButtonLink>
+                    <SquaresButtonLink
                       className="w-full sm:w-auto"
                       variant="secondary"
                       href={INFO.rulesUrl}
                     >
                       Rules
-                    </ButtonLink>
+                    </SquaresButtonLink>
                   </div>
                 </Card>
               </div>
@@ -687,8 +689,23 @@ export default function Home() {
 
         <Section id="apply" className="scroll-mt-20">
           <Container>
-            <div className="rounded-2xl border border-black/10 bg-foreground p-10 text-background shadow-lg dark:border-white/10">
-              <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+            <div
+              className={cn(
+                "relative overflow-hidden rounded-2xl border border-black/10 bg-foreground p-10 text-background shadow-lg dark:border-white/10",
+                // When bg-foreground is dark (light theme), use light grid.
+                "[--grid-border-color:rgba(255,255,255,0.26)] [--grid-hover-color:rgba(255,255,255,0.14)]",
+                // When bg-foreground is light (dark theme), use dark grid.
+                "dark:[--grid-border-color:rgba(0,0,0,0.10)] dark:[--grid-hover-color:rgba(0,0,0,0.08)]",
+              )}
+            >
+              <Squares
+                interaction="element"
+                direction="diagonal"
+                speed={0.45}
+                squareSize={26}
+                className="opacity-60"
+              />
+              <div className="relative z-10 flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="text-base font-semibold">Ready to build?</div>
                   <p className="mt-3 text-sm leading-relaxed text-background/80">
@@ -699,9 +716,10 @@ export default function Home() {
                   <RegisterButton
                     label="Apply now"
                     variant="primary"
+                    withSquares
                     className="bg-white text-black shadow-md hover:opacity-95 hover:shadow-lg"
                   />
-                  <ButtonLink
+                  <SquaresButtonLink
                     href={INFO.discordUrl}
                     variant="secondary"
                     className="border-white/25 bg-transparent text-white hover:bg-white/10"
@@ -709,7 +727,7 @@ export default function Home() {
                     rel="noopener noreferrer"
                   >
                     Join community
-                  </ButtonLink>
+                  </SquaresButtonLink>
                 </div>
               </div>
             </div>
@@ -724,10 +742,10 @@ export default function Home() {
             />
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <ButtonLink href={INFO.discordUrl} target="_blank" rel="noopener noreferrer">
+              <SquaresButtonLink href={INFO.discordUrl} target="_blank" rel="noopener noreferrer">
                 Join Discord
-              </ButtonLink>
-              <RegisterButton label="Register" variant="secondary" />
+              </SquaresButtonLink>
+              <RegisterButton label="Register" variant="secondary" withSquares />
             </div>
           </Container>
         </Section>
