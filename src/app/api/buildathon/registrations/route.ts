@@ -5,7 +5,16 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const registrations = await prisma.buildathonRegistration.findMany({
+    // Backwards-compatible endpoint name: "registrations" are Teams (+ members/projects).
+    const registrations = await prisma.team.findMany({
+      include: {
+        members: true,
+        projects: {
+          include: {
+            milestones: true,
+          },
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },

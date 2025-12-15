@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  CheckIcon,
   GlobeIcon,
   LightningBoltIcon,
   RocketIcon,
@@ -39,12 +40,115 @@ export default function Home() {
     step: string;
     type: MilestoneType;
   } | null>(null);
+
+  // Milestone completion is per-project, so we let the user pick a team + project
+  // to visualize which milestones are already completed.
+  type Team = { id: string; teamName: string };
+  type Project = { id: string; projectName: string; teamId: string };
+
+  const [milestoneTeams, setMilestoneTeams] = useState<Team[]>([]);
+  const [milestoneTeamId, setMilestoneTeamId] = useState("");
+  const [milestoneProjects, setMilestoneProjects] = useState<Project[]>([]);
+  const [milestoneProjectId, setMilestoneProjectId] = useState("");
+  const [completedMilestones, setCompletedMilestones] = useState<Set<MilestoneType>>(new Set());
+  const [milestoneStatusLoading, setMilestoneStatusLoading] = useState(false);
+  const [milestoneStatusError, setMilestoneStatusError] = useState<string | null>(null);
+
+  const PRISMA_TO_UI_MILESTONE: Record<string, MilestoneType> = {
+    REGISTRATION: "registration",
+    TESTNET: "testnet",
+    KARMA_GAP: "karma-gap",
+    MAINNET: "mainnet",
+    FARCASTER: "farcaster",
+    FINAL_SUBMISSION: "final-submission",
+  };
+
+  async function fetchMilestoneTeams() {
+    try {
+      const res = await fetch("/api/teams", { cache: "no-store" });
+      const json = (await res.json()) as { teams?: Team[]; error?: string };
+      if (!res.ok) throw new Error(json.error || "Failed to fetch teams");
+      setMilestoneTeams(json.teams || []);
+    } catch (err) {
+      console.error(err);
+      setMilestoneStatusError(err instanceof Error ? err.message : "Failed to fetch teams");
+    }
+  }
+
+  async function fetchMilestoneProjects(teamId: string) {
+    try {
+      const res = await fetch(`/api/projects?teamId=${encodeURIComponent(teamId)}`, { cache: "no-store" });
+      const json = (await res.json()) as { projects?: Project[]; error?: string };
+      if (!res.ok) throw new Error(json.error || "Failed to fetch projects");
+      setMilestoneProjects((json.projects || []) as Project[]);
+    } catch (err) {
+      console.error(err);
+      setMilestoneStatusError(err instanceof Error ? err.message : "Failed to fetch projects");
+    }
+  }
+
+  async function fetchMilestoneStatus(projectId: string) {
+    setMilestoneStatusLoading(true);
+    setMilestoneStatusError(null);
+    try {
+      const res = await fetch(`/api/milestones?projectId=${encodeURIComponent(projectId)}`, { cache: "no-store" });
+      const json = (await res.json()) as {
+        submissions?: Array<{ milestoneType: string }>;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(json.error || "Failed to fetch milestones");
+
+      const set = new Set<MilestoneType>();
+      for (const sub of json.submissions || []) {
+        const mapped = PRISMA_TO_UI_MILESTONE[sub.milestoneType];
+        if (mapped) set.add(mapped);
+      }
+      setCompletedMilestones(set);
+    } catch (err) {
+      console.error(err);
+      setMilestoneStatusError(err instanceof Error ? err.message : "Failed to fetch milestones");
+    } finally {
+      setMilestoneStatusLoading(false);
+    }
+  }
   const iconByKey = {
     rocket: <RocketIcon className="h-5 w-5" />,
     globe: <GlobeIcon className="h-5 w-5" />,
     star: <StarIcon className="h-5 w-5" />,
     bolt: <LightningBoltIcon className="h-5 w-5" />,
   } as const;
+
+  // Initial load of teams for milestone status UI.
+  useEffect(() => {
+    void fetchMilestoneTeams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Load team-scoped projects for milestone status UI.
+  useEffect(() => {
+    setMilestoneProjects([]);
+    setMilestoneProjectId("");
+    setCompletedMilestones(new Set());
+    if (!milestoneTeamId) return;
+    void fetchMilestoneProjects(milestoneTeamId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [milestoneTeamId]);
+
+  // Load milestone completion for the selected project.
+  useEffect(() => {
+    setCompletedMilestones(new Set());
+    if (!milestoneProjectId) return;
+    void fetchMilestoneStatus(milestoneProjectId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [milestoneProjectId]);
+
+  // After closing the milestone modal, refresh the completion state (useful after submissions).
+  useEffect(() => {
+    if (selectedMilestone !== null) return;
+    if (!milestoneProjectId) return;
+    void fetchMilestoneStatus(milestoneProjectId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMilestone]);
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -302,6 +406,105 @@ export default function Home() {
           </Container>
         </Section>
 
+        <Section id="milestones" className="scroll-mt-20">
+          <Container>
+            <SectionHeader
+              title="Milestones & points"
+              description="Buildathon is milestone-based. Each milestone is worth Celo Mainnet points."
+            />
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-black/80 dark:text-white/80">
+                  Team
+                </label>
+                <select
+                  value={milestoneTeamId}
+                  onChange={(e) => setMilestoneTeamId(e.target.value)}
+                  className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
+                >
+                  <option value="">Select a team (optional)</option>
+                  {milestoneTeams.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.teamName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-black/80 dark:text-white/80">
+                  Project
+                </label>
+                <select
+                  value={milestoneProjectId}
+                  onChange={(e) => setMilestoneProjectId(e.target.value)}
+                  className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-white/20 dark:bg-black"
+                  disabled={!milestoneTeamId}
+                >
+                  <option value="">
+                    {milestoneTeamId ? "Select a project (optional)" : "Select a team first"}
+                  </option>
+                  {milestoneProjects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.projectName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {milestoneStatusError ? (
+              <div className="mt-3 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
+                {milestoneStatusError}
+              </div>
+            ) : null}
+
+            <div className="mt-10 overflow-hidden rounded-xl border border-border bg-background/70 backdrop-blur dark:border-[color:var(--celo-border)] dark:bg-white/[0.03]">
+              <div className="grid grid-cols-12 gap-0 border-b border-border bg-[var(--celo-yellow-weak)] px-4 py-3 text-xs font-semibold text-foreground dark:border-[color:var(--celo-border)]">
+                <div className="col-span-8 sm:col-span-9">Milestone</div>
+                <div className="col-span-4 sm:col-span-3 text-right">Points</div>
+              </div>
+              <div className="divide-y divide-border dark:divide-[color:var(--celo-border)]">
+                {MILESTONES.map((m) => (
+                  <button
+                    key={m.step}
+                    onClick={() => setSelectedMilestone({ step: m.step, type: m.type })}
+                    className="grid w-full grid-cols-12 px-4 py-3 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
+                  >
+                    <div className="col-span-8 sm:col-span-9 text-sm text-black/80 dark:text-white/80">
+                      <div className="flex items-center gap-2">
+                        {milestoneProjectId ? (
+                          completedMilestones.has(m.type) ? (
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+                              <CheckIcon className="h-4 w-4" />
+                            </span>
+                          ) : (
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/10 text-black/40 dark:border-white/15 dark:text-white/40" />
+                          )
+                        ) : null}
+                        <span className={milestoneStatusLoading ? "opacity-80" : undefined}>
+                          {m.step}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="col-span-4 sm:col-span-3 text-right text-sm font-medium">
+                      {m.points}{" "}
+                      <span className="text-[color:var(--celo-muted)]">{m.unit}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <p className="mt-4 text-center text-sm text-black/60 dark:text-white/60">
+              {milestoneProjectId
+                ? "Click on any milestone to submit your progress"
+                : "Select a team + project to see completed milestones (optional). Click any milestone to submit."}
+            </p>
+          </Container>
+        </Section>
+
         <Section id="tracks" className="scroll-mt-20">
           <Container>
             <SectionHeader
@@ -334,43 +537,6 @@ export default function Home() {
                 </Card>
               ))}
             </div>
-          </Container>
-        </Section>
-
-        <Section id="milestones" className="scroll-mt-20">
-          <Container>
-            <SectionHeader
-              title="Milestones & points"
-              description="Buildathon is milestone-based. Each milestone is worth Celo Mainnet points."
-            />
-
-            <div className="mt-10 overflow-hidden rounded-xl border border-border bg-background/70 backdrop-blur dark:border-[color:var(--celo-border)] dark:bg-white/[0.03]">
-              <div className="grid grid-cols-12 gap-0 border-b border-border bg-[var(--celo-yellow-weak)] px-4 py-3 text-xs font-semibold text-foreground dark:border-[color:var(--celo-border)]">
-                <div className="col-span-8 sm:col-span-9">Milestone</div>
-                <div className="col-span-4 sm:col-span-3 text-right">Points</div>
-              </div>
-              <div className="divide-y divide-border dark:divide-[color:var(--celo-border)]">
-                {MILESTONES.map((m) => (
-                  <button
-                    key={m.step}
-                    onClick={() => setSelectedMilestone({ step: m.step, type: m.type })}
-                    className="grid w-full grid-cols-12 px-4 py-3 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
-                  >
-                    <div className="col-span-8 sm:col-span-9 text-sm text-black/80 dark:text-white/80">
-                      {m.step}
-                    </div>
-                    <div className="col-span-4 sm:col-span-3 text-right text-sm font-medium">
-                      {m.points}{" "}
-                      <span className="text-[color:var(--celo-muted)]">{m.unit}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <p className="mt-4 text-center text-sm text-black/60 dark:text-white/60">
-              Click on any milestone to submit your progress
-            </p>
           </Container>
         </Section>
 

@@ -24,15 +24,16 @@ export default function RegisterProjectModal({
   open,
   onOpenChange,
 }: RegisterProjectModalProps) {
-  const [formData, setFormData] = React.useState({
-    teamName: "",
-    teamMembers: "",
-    githubRepo: "",
-    karmaGapLink: "",
-  });
+  const [teamName, setTeamName] = React.useState("");
+  const [members, setMembers] = React.useState<Array<{ memberName: string; memberGithub: string }>>([
+    { memberName: "", memberGithub: "" },
+  ]);
   const [status, setStatus] = React.useState<Status>("idle");
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+  const canSubmit =
+    teamName.trim().length > 0 && members.some((m) => m.memberName.trim().length > 0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,20 +41,42 @@ export default function RegisterProjectModal({
     setErrorMessage(null);
 
     try {
+      const payload = {
+        teamName: teamName.trim(),
+        members: members
+          .map((m) => ({
+            memberName: m.memberName.trim(),
+            memberGithub: m.memberGithub.trim(),
+          }))
+          .filter((m) => m.memberName.length > 0)
+          .map((m) => ({
+            memberName: m.memberName,
+            ...(m.memberGithub ? { memberGithub: m.memberGithub.replace(/^@/, "") } : {}),
+          })),
+      };
+
+      if (!payload.teamName) {
+        setStatus("error");
+        setErrorMessage("Team name is required.");
+        return;
+      }
+
+      if (payload.members.length === 0) {
+        setStatus("error");
+        setErrorMessage("Please add at least one team member.");
+        return;
+      }
+
       const res = await fetch("/api/buildathon/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         setStatus("success");
-        setFormData({
-          teamName: "",
-          teamMembers: "",
-          githubRepo: "",
-          karmaGapLink: "",
-        });
+        setTeamName("");
+        setMembers([{ memberName: "", memberGithub: "" }]);
         onOpenChange(false);
         setShowSuccessModal(true);
         setStatus("idle");
@@ -79,7 +102,7 @@ export default function RegisterProjectModal({
           <DialogHeader>
             <DialogTitle>Apply / Register</DialogTitle>
             <DialogDescription>
-              Register your team. You can update project links later.
+              Pre-register your team. You can create projects and submit milestones after.
             </DialogDescription>
           </DialogHeader>
 
@@ -88,61 +111,84 @@ export default function RegisterProjectModal({
               <input
                 type="text"
                 required
-                value={formData.teamName}
-                onChange={(e) =>
-                  setFormData({ ...formData, teamName: e.target.value })
-                }
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
                 className={inputClassName}
                 placeholder="My awesome project"
               />
             </Field>
 
             <Field label="Team members *">
-              <input
-                type="text"
-                required
-                value={formData.teamMembers}
-                onChange={(e) =>
-                  setFormData({ ...formData, teamMembers: e.target.value })
-                }
-                className={inputClassName}
-                placeholder="e.g. Juan Pérez, María García, Carlos López"
-              />
-            </Field>
+              <div className="space-y-3">
+                {members.map((m, idx) => (
+                  <div key={idx} className="rounded-lg border border-black/10 p-3 dark:border-white/15">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-black/70 dark:text-white/70">
+                          Name *
+                        </label>
+                        <input
+                          type="text"
+                          required={idx === 0}
+                          value={m.memberName}
+                          onChange={(e) => {
+                            const next = members.slice();
+                            next[idx] = { ...next[idx], memberName: e.target.value };
+                            setMembers(next);
+                          }}
+                          className={inputClassName}
+                          placeholder="Jane Doe"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-black/70 dark:text-white/70">
+                          GitHub (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={m.memberGithub}
+                          onChange={(e) => {
+                            const next = members.slice();
+                            next[idx] = { ...next[idx], memberGithub: e.target.value };
+                            setMembers(next);
+                          }}
+                          className={inputClassName}
+                          placeholder="@username"
+                        />
+                      </div>
+                    </div>
 
-            <Field label="GitHub repo (optional)">
-              <input
-                type="url"
-                value={formData.githubRepo}
-                onChange={(e) =>
-                  setFormData({ ...formData, githubRepo: e.target.value })
-                }
-                className={inputClassName}
-                placeholder="https://github.com/user/project"
-              />
-              <p className="mt-2 text-xs text-black/60 dark:text-white/60">
-                Rule: GitHub repos should have no code before the buildathon start date (2026-01-19). Only README, LICENSE, and .gitignore files are allowed.
-              </p>
-            </Field>
+                    {members.length > 1 ? (
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setMembers(members.filter((_, i) => i !== idx))}
+                          disabled={status === "loading"}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
 
-            <Field label="Karma Gap link (optional for registration)">
-              <input
-                type="url"
-                value={formData.karmaGapLink}
-                onChange={(e) =>
-                  setFormData({ ...formData, karmaGapLink: e.target.value })
-                }
-                className={inputClassName}
-                placeholder="https://karmagap.com/..."
-              />
-              <p className="mt-2 text-xs text-black/60 dark:text-white/60">
-                For submission: include a live public demo URL and ensure your project is deployed on Celo Mainnet.
-              </p>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setMembers([...members, { memberName: "", memberGithub: "" }])}
+                  disabled={status === "loading"}
+                  className="w-full"
+                >
+                  + Add member
+                </Button>
+              </div>
             </Field>
 
             <Button
               type="submit"
-              disabled={status === "loading"}
+              disabled={status === "loading" || !canSubmit}
               className="w-full rounded-full"
             >
               {status === "loading" ? "Registering..." : "Register"}

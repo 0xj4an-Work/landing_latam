@@ -13,6 +13,7 @@ export const INFO = {
 export const NAV_LINKS = [
   { href: "#tracks", label: "Tracks" },
   { href: "#schedule", label: "Timeline" },
+  { href: "#rules", label: "Rules" },
   { href: "#milestones", label: "Milestones" },
   { href: "#prizes", label: "Prizes" },
   { href: "#faq", label: "FAQ" },

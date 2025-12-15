@@ -9,8 +9,14 @@ import type { MilestoneType } from "@/app/home-content";
 
 interface Project {
   id: string;
-  name: string;
-  description?: string;
+  projectName: string;
+  githubRepo?: string | null;
+  teamId?: string;
+}
+
+interface Team {
+  id: string;
+  teamName: string;
 }
 
 interface MilestoneSubmission {
@@ -37,14 +43,12 @@ interface MilestoneModalProps {
     step: string;
     type: MilestoneType;
   };
-  registrationId?: string;
 }
 
 export function MilestoneModal({
   isOpen,
   onClose,
   milestone,
-  registrationId,
 }: MilestoneModalProps) {
   const [selectedProject, setSelectedProject] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
@@ -60,12 +64,37 @@ export function MilestoneModal({
     pitchDeckLink: "",
   });
 
-  const fetchProjects = useCallback(async () => {
+  // Registration milestone state
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [githubRepo, setGithubRepo] = useState("");
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+
+  const fetchTeams = useCallback(async () => {
     setIsLoading(true);
     setError("");
     try {
-      const url = registrationId
-        ? `/api/projects?registrationId=${encodeURIComponent(registrationId)}`
+      const response = await fetch("/api/teams", { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error("Failed to fetch teams");
+      }
+      const data = (await response.json()) as { teams?: Team[] };
+      setTeams(data.teams || []);
+    } catch (err) {
+      setError("Failed to load teams. Please try again.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const fetchProjects = useCallback(async (teamId?: string) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const url = teamId
+        ? `/api/projects?teamId=${encodeURIComponent(teamId)}`
         : "/api/projects";
       const response = await fetch(url, { cache: "no-store" });
       if (!response.ok) {
@@ -86,7 +115,7 @@ export function MilestoneModal({
     } finally {
       setIsLoading(false);
     }
-  }, [registrationId]);
+  }, []);
 
   const fetchMilestoneData = useCallback(async (projectId: string) => {
     try {
@@ -112,16 +141,146 @@ export function MilestoneModal({
   }, []);
 
   useEffect(() => {
-    if (isOpen && milestone.type !== "registration") {
-      fetchProjects();
+    if (isOpen) {
+      // For ALL milestones, team selection is the first step.
+      // - registration: select team, then create project
+      // - others: select team, then select project and submit
+      fetchTeams();
     }
-  }, [isOpen, milestone.type, fetchProjects]);
+  }, [isOpen, fetchTeams]);
 
   useEffect(() => {
     if (selectedProject) {
       fetchMilestoneData(selectedProject);
     }
   }, [selectedProject, fetchMilestoneData]);
+
+  useEffect(() => {
+    if (selectedTeam && milestone.type !== "registration") {
+      setSelectedProject("");
+      fetchProjects(selectedTeam);
+    }
+  }, [selectedTeam, milestone.type, fetchProjects]);
+
+  const renderTeamSelector = () => (
+    <div>
+      <label className="mb-2 block text-sm font-medium">Select Your Team *</label>
+      <select
+        value={selectedTeam}
+        onChange={(e) => setSelectedTeam(e.target.value)}
+        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
+        required
+        disabled={isSubmitting}
+      >
+        <option value="">Select a team...</option>
+        {teams.map((team) => (
+          <option key={team.id} value={team.id}>
+            {team.teamName}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderProjectSelector = () => (
+    <div>
+      <label className="mb-2 block text-sm font-medium">Select Project *</label>
+      <select
+        value={selectedProject}
+        onChange={(e) => setSelectedProject(e.target.value)}
+        className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
+        required
+        disabled={isSubmitting || !selectedTeam}
+      >
+        <option value="">{selectedTeam ? "Select a project..." : "Select a team first..."}</option>
+        {projects.map((project) => (
+          <option key={project.id} value={project.id}>
+            {project.projectName}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderNoTeamsNotice = () => (
+    <div className="space-y-4">
+      <p className="text-sm text-black/70 dark:text-white/70">
+        You need to complete pre-registration first to create a team.
+      </p>
+      <Button
+        type="button"
+        onClick={() => {
+          window.location.href = "#apply";
+          onClose();
+        }}
+        className="w-full"
+      >
+        Go to Pre-Registration Form
+      </Button>
+    </div>
+  );
+
+  const renderNonRegistrationGate = (content: React.ReactNode) => {
+    if (isLoading && teams.length === 0) {
+      return <p className="text-sm text-black/70 dark:text-white/70">Loading teams...</p>;
+    }
+    if (teams.length === 0) return renderNoTeamsNotice();
+    if (isLoading) {
+      return <p className="text-sm text-black/70 dark:text-white/70">Loading projects...</p>;
+    }
+    return <>{content}</>;
+  };
+
+  const handleCreateProject = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsCreatingProject(true);
+    setError("");
+
+    try {
+      // Create the project
+      const projectResponse = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectName,
+          githubRepo,
+          teamId: selectedTeam,
+        }),
+      });
+
+      if (!projectResponse.ok) {
+        const data = (await projectResponse.json()) as { error?: string };
+        throw new Error(data.error || "Failed to create project");
+      }
+
+      const projectData = (await projectResponse.json()) as { project: { id: string } };
+
+      // Submit the REGISTRATION milestone
+      const milestoneResponse = await fetch("/api/milestones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId: projectData.project.id,
+          milestoneType: "registration",
+        }),
+      });
+
+      if (!milestoneResponse.ok) {
+        throw new Error("Failed to submit registration milestone");
+      }
+
+      // Success - reset form and close modal
+      setProjectName("");
+      setGithubRepo("");
+      setSelectedTeam("");
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create project. Please try again.");
+      console.error(err);
+    } finally {
+      setIsCreatingProject(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,48 +327,104 @@ export function MilestoneModal({
       case "registration":
         return (
           <div className="space-y-4">
-            <p className="text-sm text-black/70 dark:text-white/70">
-              Complete your pre-registration to get started.
-            </p>
-            <Button
-              type="button"
-              onClick={() => {
-                window.location.href = "#apply";
-                onClose();
-              }}
-              className="w-full"
-            >
-              Go to Registration Form
-            </Button>
+            {isLoading ? (
+              <p className="text-sm text-black/70 dark:text-white/70">Loading teams...</p>
+            ) : teams.length === 0 ? (
+              <div className="space-y-4">
+                <p className="text-sm text-black/70 dark:text-white/70">
+                  You need to complete pre-registration first to create a team.
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    window.location.href = "#apply";
+                    onClose();
+                  }}
+                  className="w-full"
+                >
+                  Go to Pre-Registration Form
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleCreateProject}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Select Your Team *
+                    </label>
+                    <select
+                      value={selectedTeam}
+                      onChange={(e) => setSelectedTeam(e.target.value)}
+                      className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
+                      required
+                      disabled={isCreatingProject}
+                    >
+                      <option value="">Select a team...</option>
+                      {teams.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.teamName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedTeam && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Project Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={projectName}
+                          onChange={(e) => setProjectName(e.target.value)}
+                          placeholder="My Awesome Project"
+                          className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
+                          required
+                          disabled={isCreatingProject}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          GitHub Repository *
+                        </label>
+                        <input
+                          type="url"
+                          value={githubRepo}
+                          onChange={(e) => setGithubRepo(e.target.value)}
+                          placeholder="https://github.com/username/project"
+                          className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
+                          required
+                          disabled={isCreatingProject}
+                        />
+                        <p className="mt-2 text-xs text-black/60 dark:text-white/60">
+                          Rule: GitHub repos should have no code before the buildathon start date (2026-01-19). Only README, LICENSE, and .gitignore files are allowed.
+                        </p>
+                      </div>
+
+                      {error && (
+                        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                      )}
+
+                      <Button type="submit" className="w-full" disabled={isCreatingProject}>
+                        {isCreatingProject ? "Creating Project..." : "Create Project & Register"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </form>
+            )}
           </div>
         );
 
       case "testnet":
         return (
           <div className="space-y-4">
-            {isLoading ? (
-              <p className="text-sm text-black/70 dark:text-white/70">Loading projects...</p>
-            ) : (
+            {renderNonRegistrationGate(
               <>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Select Project
-                  </label>
-                  <select
-                    value={selectedProject}
-                    onChange={(e) => setSelectedProject(e.target.value)}
-                    className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
-                    required
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Select a project...</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {renderTeamSelector()}
+                {renderProjectSelector()}
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Testnet Contract Address
@@ -232,7 +447,7 @@ export function MilestoneModal({
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Submitting..." : "Submit Testnet Deployment"}
                 </Button>
-              </>
+              </>,
             )}
           </div>
         );
@@ -240,29 +455,10 @@ export function MilestoneModal({
       case "karma-gap":
         return (
           <div className="space-y-4">
-            {isLoading ? (
-              <p className="text-sm text-black/70 dark:text-white/70">Loading projects...</p>
-            ) : (
+            {renderNonRegistrationGate(
               <>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Select Project
-                  </label>
-                  <select
-                    value={selectedProject}
-                    onChange={(e) => setSelectedProject(e.target.value)}
-                    className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
-                    required
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Select a project...</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {renderTeamSelector()}
+                {renderProjectSelector()}
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Karma Gap Project Link
@@ -285,7 +481,7 @@ export function MilestoneModal({
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Submitting..." : "Submit Karma Gap Project"}
                 </Button>
-              </>
+              </>,
             )}
           </div>
         );
@@ -293,29 +489,10 @@ export function MilestoneModal({
       case "mainnet":
         return (
           <div className="space-y-4">
-            {isLoading ? (
-              <p className="text-sm text-black/70 dark:text-white/70">Loading projects...</p>
-            ) : (
+            {renderNonRegistrationGate(
               <>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Select Project
-                  </label>
-                  <select
-                    value={selectedProject}
-                    onChange={(e) => setSelectedProject(e.target.value)}
-                    className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
-                    required
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Select a project...</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {renderTeamSelector()}
+                {renderProjectSelector()}
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Mainnet Contract Address
@@ -338,7 +515,7 @@ export function MilestoneModal({
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Submitting..." : "Submit Mainnet Deployment"}
                 </Button>
-              </>
+              </>,
             )}
           </div>
         );
@@ -346,29 +523,10 @@ export function MilestoneModal({
       case "farcaster":
         return (
           <div className="space-y-4">
-            {isLoading ? (
-              <p className="text-sm text-black/70 dark:text-white/70">Loading projects...</p>
-            ) : (
+            {renderNonRegistrationGate(
               <>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Select Project
-                  </label>
-                  <select
-                    value={selectedProject}
-                    onChange={(e) => setSelectedProject(e.target.value)}
-                    className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
-                    required
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Select a project...</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {renderTeamSelector()}
+                {renderProjectSelector()}
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Farcaster Miniapp Link
@@ -394,7 +552,7 @@ export function MilestoneModal({
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Submitting..." : "Submit Farcaster Integration"}
                 </Button>
-              </>
+              </>,
             )}
           </div>
         );
@@ -402,29 +560,10 @@ export function MilestoneModal({
       case "final-submission":
         return (
           <div className="space-y-4">
-            {isLoading ? (
-              <p className="text-sm text-black/70 dark:text-white/70">Loading projects...</p>
-            ) : (
+            {renderNonRegistrationGate(
               <>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Select Project
-                  </label>
-                  <select
-                    value={selectedProject}
-                    onChange={(e) => setSelectedProject(e.target.value)}
-                    className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
-                    required
-                    disabled={isSubmitting}
-                  >
-                    <option value="">Select a project...</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {renderTeamSelector()}
+                {renderProjectSelector()}
 
                 {selectedProject && projectSubmissions && (
                   <div className="rounded-lg border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5">
@@ -489,7 +628,7 @@ export function MilestoneModal({
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Submitting..." : "Submit Final Project"}
                 </Button>
-              </>
+              </>,
             )}
           </div>
         );
@@ -516,9 +655,13 @@ export function MilestoneModal({
             Submit your progress for this milestone
           </Dialog.Description>
 
-          <form onSubmit={handleSubmit} className="mt-6">
-            {renderForm()}
-          </form>
+          <div className="mt-6">
+            {milestone.type === "registration" ? (
+              renderForm()
+            ) : (
+              <form onSubmit={handleSubmit}>{renderForm()}</form>
+            )}
+          </div>
 
           <Dialog.Close asChild>
             <button

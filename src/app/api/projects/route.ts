@@ -7,17 +7,17 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const registrationIdRaw = searchParams.get("registrationId");
+    const teamIdRaw = searchParams.get("teamId");
     // Treat missing/placeholder values as "no filter" to keep the UI resilient.
-    const registrationId =
-      registrationIdRaw &&
-      registrationIdRaw !== "undefined" &&
-      registrationIdRaw !== "null"
-        ? registrationIdRaw
+    const teamId =
+      teamIdRaw &&
+      teamIdRaw !== "undefined" &&
+      teamIdRaw !== "null"
+        ? teamIdRaw
         : null;
 
     const projects = await prisma.project.findMany({
-      where: registrationId ? { registrationId } : undefined,
+      where: teamId ? { teamId } : undefined,
       orderBy: {
         createdAt: "desc",
       },
@@ -39,20 +39,34 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, description, registrationId } = body;
+    const { projectName, githubRepo, teamId } = body;
 
-    if (!name || !registrationId) {
+    if (!projectName || !teamId) {
       return NextResponse.json(
-        { error: "Name and registration ID are required" },
+        { error: "Project name and team ID are required" },
+        { status: 400 },
+      );
+    }
+
+    if (!githubRepo) {
+      return NextResponse.json(
+        { error: "GitHub repository is required" },
         { status: 400 },
       );
     }
 
     const project = await prisma.project.create({
       data: {
-        name,
-        description,
-        registrationId,
+        projectName,
+        githubRepo,
+        teamId,
+      },
+      include: {
+        team: {
+          include: {
+            members: true,
+          },
+        },
       },
     });
 
@@ -61,6 +75,37 @@ export async function POST(request: Request) {
     console.error("Database error:", error);
     return NextResponse.json(
       { error: "Failed to create project" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const projectId = searchParams.get("projectId");
+
+    if (!projectId) {
+      return NextResponse.json(
+        { error: "Project ID is required" },
+        { status: 400 },
+      );
+    }
+
+    // Be robust even if DB-level cascades are not in place yet.
+    await prisma.$transaction([
+      prisma.milestone.deleteMany({ where: { projectId } }),
+      prisma.project.delete({ where: { id: projectId } }),
+    ]);
+
+    return NextResponse.json(
+      { ok: true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch (error) {
+    console.error("Database error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete project" },
       { status: 500 },
     );
   }
