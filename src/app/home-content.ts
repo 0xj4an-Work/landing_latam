@@ -14,7 +14,7 @@ export const NAV_LINKS = [
   { href: "#tracks", label: "Tracks" },
   { href: "#schedule", label: "Timeline" },
   { href: "#rules", label: "Rules" },
-  { href: "#milestones", label: "Milestones" },
+  { href: "#submit", label: "Submit" },
   { href: "#prizes", label: "Prizes" },
   { href: "#faq", label: "FAQ" },
 ] as const;
@@ -22,7 +22,7 @@ export const NAV_LINKS = [
 export const TIMELINE = [
   {
     title: "Pre-registrations",
-    range: "Dec 15, 2025 → Jan 16, 2026",
+    range: "Dec 17, 2025 → Jan 16, 2026",
     note: "Get early access and prep your idea/team.",
   },
   {
@@ -43,23 +43,6 @@ export const TRACKS = [
   { title: "MiniPay Miniapps", description: "Build a MiniPay miniapp focused on real usage." },
   { title: "Mento", description: "Build using Mento primitives / stable-value experiences." },
   { title: "Self", description: "Build with Self (identity/attestations—define your angle)." },
-] as const;
-
-export type MilestoneType =
-  | "registration"
-  | "testnet"
-  | "karma-gap"
-  | "mainnet"
-  | "farcaster"
-  | "final-submission";
-
-export const MILESTONES = [
-  { step: "Registration", points: 1, unit: "Celo Mainnet", type: "registration" as MilestoneType },
-  { step: "Build your app on Testnet", points: 2, unit: "Celo Mainnet", type: "testnet" as MilestoneType },
-  { step: "Create a Karma Gap Project", points: 2, unit: "Celo Mainnet", type: "karma-gap" as MilestoneType },
-  { step: "Build your app on Mainnet", points: 2, unit: "Celo Mainnet", type: "mainnet" as MilestoneType },
-  { step: "Integrate your mini app on Farcaster (optional)", points: 1, unit: "Celo Mainnet", type: "farcaster" as MilestoneType },
-  { step: "Final submission for the project", points: 2, unit: "Celo Mainnet", type: "final-submission" as MilestoneType },
 ] as const;
 
 export type HighlightIconKey = "rocket" | "globe" | "star" | "bolt";

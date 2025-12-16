@@ -1,9 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import {
-  CheckIcon,
   GlobeIcon,
   LightningBoltIcon,
   RocketIcon,
@@ -11,8 +9,8 @@ import {
 } from "@radix-ui/react-icons";
 
 import { Faq } from "@/components/faq";
-import { MilestoneModal } from "@/components/milestones/MilestoneModal";
 import RegisterButton from "@/components/register/RegisterButton";
+import SubmitButton from "@/components/submit/SubmitButton";
 import { Container, Section, SectionHeader } from "@/components/section";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -31,162 +29,18 @@ import {
   FAQ,
   HIGHLIGHTS,
   INFO,
-  MILESTONES,
   NAV_LINKS,
   TIMELINE,
   TRACKS,
-  type MilestoneType,
 } from "@/app/home-content";
 
 export default function Home() {
-  const [selectedMilestone, setSelectedMilestone] = useState<{
-    step: string;
-    type: MilestoneType;
-  } | null>(null);
-
-  // Milestone completion is per-project, so we let the user pick a team + project
-  // to visualize which milestones are already completed.
-  type Team = { id: string; teamName: string };
-  type Project = { id: string; projectName: string; teamId: string };
-
-  const [milestoneTeams, setMilestoneTeams] = useState<Team[]>([]);
-  const [milestoneTeamId, setMilestoneTeamId] = useState("");
-  const [milestoneProjects, setMilestoneProjects] = useState<Project[]>([]);
-  const [milestoneProjectId, setMilestoneProjectId] = useState("");
-  const [completedMilestones, setCompletedMilestones] = useState<Set<MilestoneType>>(new Set());
-  const [milestoneStatusLoading, setMilestoneStatusLoading] = useState(false);
-  const [milestoneStatusError, setMilestoneStatusError] = useState<string | null>(null);
-
-  const PRISMA_TO_UI_MILESTONE: Record<string, MilestoneType> = {
-    REGISTRATION: "registration",
-    TESTNET: "testnet",
-    KARMA_GAP: "karma-gap",
-    MAINNET: "mainnet",
-    FARCASTER: "farcaster",
-    FINAL_SUBMISSION: "final-submission",
-  };
-
-  async function fetchMilestoneTeams() {
-    try {
-      const res = await fetch("/api/teams", { cache: "no-store" });
-      const json = (await res.json()) as { teams?: Team[]; error?: string };
-      if (!res.ok) throw new Error(json.error || "Failed to fetch teams");
-      setMilestoneTeams(json.teams || []);
-    } catch {
-      // Silently fail if database is not available (frontend-only development)
-      setMilestoneTeams([]);
-    }
-  }
-
-  async function fetchMilestoneProjects(teamId: string) {
-    try {
-      const res = await fetch(`/api/projects?teamId=${encodeURIComponent(teamId)}`, { cache: "no-store" });
-      const json = (await res.json()) as { projects?: Project[]; error?: string };
-      if (!res.ok) throw new Error(json.error || "Failed to fetch projects");
-      setMilestoneProjects((json.projects || []) as Project[]);
-    } catch (err) {
-      console.error(err);
-      setMilestoneStatusError(err instanceof Error ? err.message : "Failed to fetch projects");
-    }
-  }
-
-  async function fetchMilestoneStatus(projectId: string) {
-    setMilestoneStatusLoading(true);
-    setMilestoneStatusError(null);
-    try {
-      const res = await fetch(`/api/milestones?projectId=${encodeURIComponent(projectId)}`, { cache: "no-store" });
-      const json = (await res.json()) as {
-        submissions?: Array<{ milestoneType: string }>;
-        error?: string;
-      };
-      if (!res.ok) throw new Error(json.error || "Failed to fetch milestones");
-
-      const set = new Set<MilestoneType>();
-      for (const sub of json.submissions || []) {
-        const mapped = PRISMA_TO_UI_MILESTONE[sub.milestoneType];
-        if (mapped) set.add(mapped);
-      }
-      setCompletedMilestones(set);
-    } catch (err) {
-      console.error(err);
-      setMilestoneStatusError(err instanceof Error ? err.message : "Failed to fetch milestones");
-    } finally {
-      setMilestoneStatusLoading(false);
-    }
-  }
   const iconByKey = {
     rocket: <RocketIcon className="h-5 w-5" />,
     globe: <GlobeIcon className="h-5 w-5" />,
     star: <StarIcon className="h-5 w-5" />,
     bolt: <LightningBoltIcon className="h-5 w-5" />,
   } as const;
-
-  // Initial load of teams for milestone status UI.
-  useEffect(() => {
-    void fetchMilestoneTeams();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Load team-scoped projects for milestone status UI.
-  useEffect(() => {
-    setMilestoneProjects([]);
-    setMilestoneProjectId("");
-    setCompletedMilestones(new Set());
-    if (!milestoneTeamId) return;
-    void fetchMilestoneProjects(milestoneTeamId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [milestoneTeamId]);
-
-  // Load milestone completion for the selected project.
-  useEffect(() => {
-    setCompletedMilestones(new Set());
-    if (!milestoneProjectId) return;
-    void fetchMilestoneStatus(milestoneProjectId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [milestoneProjectId]);
-
-  // After closing the milestone modal, refresh the completion state (useful after submissions).
-  useEffect(() => {
-    if (selectedMilestone !== null) return;
-    if (!milestoneProjectId) return;
-    void fetchMilestoneStatus(milestoneProjectId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMilestone]);
-
-  function getUnlockInfo(type: MilestoneType): { unlocked: boolean; reason?: string } {
-    if (!milestoneProjectId) return { unlocked: true };
-
-    const has = (t: MilestoneType) => completedMilestones.has(t);
-
-    switch (type) {
-      case "registration":
-        return { unlocked: true };
-      case "testnet":
-        return has("registration")
-          ? { unlocked: true }
-          : { unlocked: false, reason: 'Complete "Registration" first.' };
-      case "karma-gap":
-        return has("testnet")
-          ? { unlocked: true }
-          : { unlocked: false, reason: 'Complete "Testnet" first.' };
-      case "mainnet":
-        return has("karma-gap")
-          ? { unlocked: true }
-          : { unlocked: false, reason: 'Complete "Karma Gap" first.' };
-      case "farcaster":
-        // Optional milestone, but still only after Mainnet.
-        return has("mainnet")
-          ? { unlocked: true }
-          : { unlocked: false, reason: 'Complete "Mainnet" first.' };
-      case "final-submission":
-        // Final depends on Mainnet (Farcaster is optional).
-        return has("mainnet")
-          ? { unlocked: true }
-          : { unlocked: false, reason: 'Complete "Mainnet" first.' };
-      default:
-        return { unlocked: true };
-    }
-  }
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -247,7 +101,7 @@ export default function Home() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
                     </span>
-                    Pre-registrations: Dec 15, 2025 → Jan 16, 2026
+                    Pre-registrations: Dec 17, 2025 → Jan 16, 2026
                   </div>
                   <h1 className="mt-8 text-balance text-4xl font-title font-[200] leading-[1.1] tracking-tight sm:text-6xl sm:leading-[1.1]">
                     {INFO.tagline}
@@ -470,185 +324,59 @@ export default function Home() {
           </Container>
         </Section>
 
-        <Section id="milestones" className="scroll-mt-20">
+        <Section id="submit" className="scroll-mt-20">
           <Container>
             <SectionHeader
-              title="Milestones & points"
-              description="Buildathon is milestone-based. Each milestone is worth Celo Mainnet points."
+              title="Submit your project"
+              description="Once you've pre-registered and built your project, submit it here with your Karma Gap link."
             />
 
-            <Card className="mt-4 border-[color:var(--celo-border)] bg-background/70 p-4 text-sm text-foreground/80">
-              Complete milestones in order to unlock submissions and earn Celo Mainnet points.
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              <Card className="p-8">
+                <div className="text-base font-semibold">Pre-registration (Dec 17 - Jan 16)</div>
+                <p className="mt-3 text-sm leading-relaxed text-black/70 dark:text-white/70">
+                  Register your team using the form on this website. You'll provide your team name,
+                  member details, and an EVM wallet address to receive 3 CELO for deployments.
+                </p>
+                <div className="mt-6">
+                  <RegisterButton
+                    label="Pre-register now"
+                    variant="primary"
+                    withSquares
+                    className="w-full sm:w-auto"
+                  />
+                </div>
+              </Card>
+
+              <Card className="p-8">
+                <div className="text-base font-semibold">Submission (Jan 16 - Feb 27)</div>
+                <p className="mt-3 text-sm leading-relaxed text-black/70 dark:text-white/70">
+                  Submit your Karma Gap project link. Your Karma Gap profile must include your
+                  GitHub repo, demo video, presentation deck, and live demo URL.
+                </p>
+                <div className="mt-6">
+                  <SubmitButton
+                    label="Submit project"
+                    variant="secondary"
+                    withSquares
+                    className="w-full sm:w-auto"
+                  />
+                </div>
+              </Card>
+            </div>
+
+            <Card className="mt-6 border-[color:var(--celo-border)] bg-background/70 p-6">
+              <div className="text-sm font-semibold text-foreground mb-4">Submission Requirements</div>
+              <p className="text-sm text-black/70 dark:text-white/70 mb-4">
+                You'll submit your Karma Gap project link via the form. Your Karma Gap profile must include:
+              </p>
+              <div className="space-y-3 text-sm">
+                <ChecklistItem>GitHub repository link (repo should be empty before Jan 19, 2026)</ChecklistItem>
+                <ChecklistItem>Live demo URL (deployed on Celo Mainnet)</ChecklistItem>
+                <ChecklistItem>Presentation deck explaining your project</ChecklistItem>
+                <ChecklistItem>Demo video showing your application in action</ChecklistItem>
+              </div>
             </Card>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              <Card className="p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--celo-muted)]">
-                  Step 1
-                </div>
-                <div className="mt-2 text-sm font-semibold text-foreground">Register your project</div>
-                <p className="mt-2 text-sm text-foreground/80">
-                  Use the Registration milestone to create your project (team is required). This unlocks the rest.
-                </p>
-              </Card>
-
-              <Card className="p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--celo-muted)]">
-                  Step 2
-                </div>
-                <div className="mt-2 text-sm font-semibold text-foreground">Select team & project</div>
-                <p className="mt-2 text-sm text-foreground/80">
-                  Choose your team and project in the selectors below to view status and submit proofs.
-                </p>
-              </Card>
-
-              <Card className="p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--celo-muted)]">
-                  Step 3
-                </div>
-                <div className="mt-2 text-sm font-semibold text-foreground">Complete milestones</div>
-                <p className="mt-2 text-sm text-foreground/80">
-                  Submit each milestone in order to unlock the next one and earn Celo Mainnet points. Farcaster is optional.
-                </p>
-              </Card>
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-black/80 dark:text-white/80">
-                  Team
-                </label>
-                <select
-                  value={milestoneTeamId}
-                  onChange={(e) => setMilestoneTeamId(e.target.value)}
-                  className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/20 dark:bg-black"
-                >
-                  <option value="">Select a team</option>
-                  {milestoneTeams.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.teamName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-black/80 dark:text-white/80">
-                  Project
-                </label>
-                <select
-                  value={milestoneProjectId}
-                  onChange={(e) => setMilestoneProjectId(e.target.value)}
-                  className="w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-white/20 dark:bg-black"
-                  disabled={!milestoneTeamId}
-                >
-                  <option value="">
-                    {milestoneTeamId ? "Select a project" : "Select a team first"}
-                  </option>
-                  {milestoneProjects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.projectName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {milestoneStatusError ? (
-              <div className="mt-3 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
-                {milestoneStatusError}
-              </div>
-            ) : null}
-
-            <div className="mt-10 overflow-hidden rounded-xl border border-border bg-background/70 backdrop-blur dark:border-[color:var(--celo-border)] dark:bg-white/[0.03]">
-              <div className="grid grid-cols-12 gap-0 border-b border-border bg-[var(--celo-yellow-weak)] px-4 py-3 text-xs font-semibold text-foreground dark:border-[color:var(--celo-border)]">
-                <div className="col-span-8 sm:col-span-9">Milestone</div>
-                <div className="col-span-4 sm:col-span-3 text-right">Points</div>
-              </div>
-              <div className="divide-y divide-border dark:divide-[color:var(--celo-border)]">
-                {MILESTONES.map((m) => (
-                  (() => {
-                    const info = getUnlockInfo(m.type);
-                    const locked = milestoneProjectId ? !info.unlocked : false;
-                    const isCompleted = milestoneProjectId ? completedMilestones.has(m.type) : false;
-                    const handleClick = () => {
-                      if (locked) return;
-                      setSelectedMilestone({ step: m.step, type: m.type });
-                    };
-                    return (
-                      <div
-                        key={m.step}
-                        title={locked && info.reason ? info.reason : undefined}
-                        className={cn(
-                          "grid w-full grid-cols-12 items-center px-4 py-3 transition-colors",
-                          locked
-                            ? "cursor-not-allowed opacity-55"
-                            : "hover:bg-black/[0.03] dark:hover:bg-white/[0.06]",
-                        )}
-                        aria-disabled={locked}
-                      >
-                        <div className="col-span-7 sm:col-span-8 text-sm text-black/80 dark:text-white/80">
-                          <div className="flex items-center gap-2">
-                            {milestoneProjectId ? (
-                              completedMilestones.has(m.type) ? (
-                                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
-                                  <CheckIcon className="h-4 w-4" />
-                                </span>
-                              ) : (
-                                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/10 text-[11px] font-semibold text-black/50 dark:border-white/15 dark:text-white/55">
-                                  ?
-                                </span>
-                              )
-                            ) : null}
-                            <span className={milestoneStatusLoading ? "opacity-80" : undefined}>
-                              {m.step}
-                            </span>
-                            {locked ? (
-                              <span className="ml-1 text-xs text-black/50 dark:text-white/50">
-                                (locked)
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-                        <div className="col-span-3 sm:col-span-2 text-right text-sm font-medium">
-                          {m.points}{" "}
-                          <span className="text-[color:var(--celo-muted)]">{m.unit}</span>
-                        </div>
-                        <div className="col-span-2 flex justify-end">
-                          <button
-                            type="button"
-                            onClick={handleClick}
-                            disabled={locked}
-                            className={cn(
-                              "inline-flex items-center justify-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold transition",
-                              isCompleted
-                                ? "bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 active:translate-y-[1px]"
-                                : "bg-[var(--celo-yellow)] text-black shadow-sm hover:opacity-90 active:translate-y-[1px]",
-                              locked ? "opacity-55 cursor-not-allowed" : "",
-                            )}
-                          >
-                            {isCompleted ? (
-                              <>
-                                <CheckIcon className="h-3.5 w-3.5" />
-                                Completed
-                              </>
-                            ) : (
-                              "Complete milestone"
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })()
-                ))}
-              </div>
-            </div>
-
-            <p className="mt-6 text-center text-sm text-black/60 dark:text-white/60">
-              {milestoneProjectId
-                ? "Click on any milestone to submit your progress"
-                : "Select a team + project to see completed milestones. Click any milestone to submit."}
-            </p>
           </Container>
         </Section>
 
@@ -818,12 +546,6 @@ export default function Home() {
           </div>
         </Container>
       </footer>
-
-      <MilestoneModal
-        isOpen={selectedMilestone !== null}
-        onClose={() => setSelectedMilestone(null)}
-        milestone={selectedMilestone || { step: "", type: "registration" }}
-      />
     </div>
   );
 }

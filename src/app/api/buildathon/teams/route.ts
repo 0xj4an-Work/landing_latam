@@ -7,8 +7,10 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const teams = await prisma.team.findMany({
-      include: {
-        members: true,
+      // Public endpoint: return minimal fields only (do NOT expose member emails or wallet addresses).
+      select: {
+        id: true,
+        teamName: true,
       },
       orderBy: { createdAt: "desc" },
     });

@@ -5,12 +5,14 @@ export const runtime = "nodejs";
 
 type TeamMember = {
   memberName: string;
+  memberEmail: string;
   memberGithub?: string;
   country?: string;
 };
 
 type RegisterPayload = {
   teamName: string;
+  walletAddress: string;
   members: TeamMember[];
 };
 
@@ -25,11 +27,27 @@ export async function POST(req: Request) {
     }
 
     const teamName = typeof body.teamName === "string" ? body.teamName.trim() : "";
+    const walletAddress = typeof body.walletAddress === "string" ? body.walletAddress.trim() : "";
     const members = Array.isArray(body.members) ? body.members : [];
 
     if (!teamName) {
       return NextResponse.json(
         { error: "Team name is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!walletAddress) {
+      return NextResponse.json(
+        { error: "Wallet address is required" },
+        { status: 400 },
+      );
+    }
+
+    // Validate EVM wallet address format
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      return NextResponse.json(
+        { error: "Invalid EVM wallet address format" },
         { status: 400 },
       );
     }
@@ -45,6 +63,7 @@ export async function POST(req: Request) {
     const validMembers = members
       .map((m) => ({
         memberName: typeof m.memberName === "string" ? m.memberName.trim() : "",
+        memberEmail: typeof m.memberEmail === "string" ? m.memberEmail.trim() : "",
         memberGithub: typeof m.memberGithub === "string" ? m.memberGithub.trim() : "",
         country: typeof m.country === "string" ? m.country.trim() : "",
       }))
@@ -53,6 +72,15 @@ export async function POST(req: Request) {
     if (validMembers.length === 0) {
       return NextResponse.json(
         { error: "At least one team member with a name is required" },
+        { status: 400 },
+      );
+    }
+
+    // Check if all members have an email
+    const membersWithoutEmail = validMembers.filter((m) => !m.memberEmail);
+    if (membersWithoutEmail.length > 0) {
+      return NextResponse.json(
+        { error: "Email is required for all team members" },
         { status: 400 },
       );
     }
@@ -67,23 +95,36 @@ export async function POST(req: Request) {
     }
 
     // Create team with members
-    const team = await prisma.team.create({
-      data: {
-        teamName,
-        members: {
-          create: validMembers.map((m) => ({
-            memberName: m.memberName,
-            memberGithub: m.memberGithub || null,
-            country: m.country || null,
-          })),
+    try {
+      const team = await prisma.team.create({
+        data: {
+          teamName,
+          walletAddress,
+          members: {
+            create: validMembers.map((m) => ({
+              memberName: m.memberName,
+              memberEmail: m.memberEmail,
+              memberGithub: m.memberGithub || null,
+              country: m.country || null,
+            })),
+          },
         },
-      },
-      include: {
-        members: true,
-      },
-    });
+        include: {
+          members: true,
+        },
+      });
 
-    return NextResponse.json({ ok: true, teamId: team.id });
+      return NextResponse.json({ ok: true, teamId: team.id });
+    } catch (dbError) {
+      // Check for unique constraint violation on memberEmail
+      if (dbError && typeof dbError === "object" && "code" in dbError && dbError.code === "P2002") {
+        return NextResponse.json(
+          { error: "One or more email addresses are already registered with another team" },
+          { status: 400 },
+        );
+      }
+      throw dbError;
+    }
   } catch (error) {
     console.error("[POST] Database error:", error);
     console.error("[POST] Error stack:", error instanceof Error ? error.stack : "N/A");

@@ -8,12 +8,13 @@ datasource db {
 }
 
 model Team {
-  id        String       @id @default(cuid())
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  teamName  String
-  projects  Project[]
-  members   TeamMember[]
+  id            String       @id @default(cuid())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  teamName      String
+  walletAddress String
+  members       TeamMember[]
+  submission    Submission?
 
   @@index([createdAt])
   @@map("teams")
@@ -25,6 +26,7 @@ model TeamMember {
   updatedAt    DateTime @updatedAt
   teamId       String
   memberName   String
+  memberEmail  String   @unique
   memberGithub String?
   country      String?
   team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
@@ -33,44 +35,13 @@ model TeamMember {
   @@map("team_members")
 }
 
-model Project {
-  id          String      @id @default(cuid())
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  githubRepo  String?
-  projectName String
-  teamId      String
-  milestones  Milestone[]
-  team        Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+model Submission {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  teamId       String   @unique
+  karmaGapLink String
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
-  @@index([teamId])
-  @@map("projects")
-}
-
-model Milestone {
-  id              String        @id @default(cuid())
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  projectId       String
-  milestoneType   MilestoneType
-  contractAddress String?
-  karmaGapLink    String?
-  farcasterLink   String?
-  slidesLink      String?
-  pitchDeckLink   String?
-  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@unique([projectId, milestoneType])
-  @@index([projectId])
-  @@index([milestoneType])
-  @@map("milestones")
-}
-
-enum MilestoneType {
-  REGISTRATION
-  TESTNET
-  KARMA_GAP
-  MAINNET
-  FARCASTER
-  FINAL_SUBMISSION
+  @@map("submissions")
 }

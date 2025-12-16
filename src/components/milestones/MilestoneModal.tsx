@@ -5,7 +5,14 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 
-import type { MilestoneType } from "@/app/home-content";
+// Legacy type definition for backward compatibility
+type MilestoneType =
+  | "registration"
+  | "testnet"
+  | "karma-gap"
+  | "mainnet"
+  | "farcaster"
+  | "final-submission";
 
 interface Project {
   id: string;

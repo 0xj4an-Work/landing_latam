@@ -41,13 +41,8 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Be robust even if DB-level cascades are not in place yet.
-    await prisma.$transaction([
-      prisma.milestone.deleteMany({ where: { project: { teamId } } }),
-      prisma.project.deleteMany({ where: { teamId } }),
-      prisma.teamMember.deleteMany({ where: { teamId } }),
-      prisma.team.delete({ where: { id: teamId } }),
-    ]);
+    // Delete team (cascade will handle members and submission)
+    await prisma.team.delete({ where: { id: teamId } });
 
     return NextResponse.json(
       { ok: true },

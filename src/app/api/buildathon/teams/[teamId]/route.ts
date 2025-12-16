@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 
 type TeamMember = {
   memberName: string;
+  memberEmail: string;
   memberGithub?: string;
   country?: string;
 };
@@ -41,6 +42,7 @@ export async function PATCH(
     const validMembers = members
       .map((m) => ({
         memberName: typeof m.memberName === "string" ? m.memberName.trim() : "",
+        memberEmail: typeof m.memberEmail === "string" ? m.memberEmail.trim() : "",
         memberGithub: typeof m.memberGithub === "string" ? m.memberGithub.trim() : "",
         country: typeof m.country === "string" ? m.country.trim() : "",
       }))
@@ -49,6 +51,15 @@ export async function PATCH(
     if (validMembers.length === 0) {
       return NextResponse.json(
         { error: "At least one team member with a name is required" },
+        { status: 400 },
+      );
+    }
+
+    // Check if all members have an email
+    const membersWithoutEmail = validMembers.filter((m) => !m.memberEmail);
+    if (membersWithoutEmail.length > 0) {
+      return NextResponse.json(
+        { error: "Email is required for all team members" },
         { status: 400 },
       );
     }
@@ -73,6 +84,7 @@ export async function PATCH(
       data: validMembers.map((m) => ({
         teamId,
         memberName: m.memberName,
+        memberEmail: m.memberEmail,
         memberGithub: m.memberGithub || null,
         country: m.country || null,
       })),

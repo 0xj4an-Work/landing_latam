@@ -11,6 +11,10 @@ export async function middleware(request: NextRequest) {
   // - destructive admin APIs (DELETE requests)
   const isAdminPage = pathname.startsWith("/admin");
   const isAdminLoginPage = pathname === "/admin/login";
+
+  // Protect write access to buildathon teams (GET is public for submit flow; writes are admin-only).
+  const isBuildathonTeamsWriteApi =
+    pathname.startsWith("/api/buildathon/teams") && request.method !== "GET";
   const isAdminDeleteApi =
     request.method === "DELETE" &&
     (pathname === "/api/teams" ||
@@ -22,7 +26,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/api/buildathon/registrations" ||
     pathname === "/api/buildathon/registrations/";
 
-  if (!isAdminPage && !isAdminDeleteApi && !isAdminReadApi) {
+  if (!isAdminPage && !isBuildathonTeamsWriteApi && !isAdminDeleteApi && !isAdminReadApi) {
     return NextResponse.next();
   }
 
