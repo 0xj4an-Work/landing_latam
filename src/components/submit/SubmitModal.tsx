@@ -18,46 +18,67 @@ interface SubmitModalProps {
 }
 
 type Status = "idle" | "loading" | "success" | "error";
+type Step = "email" | "submit";
 
-type Team = {
+type TeamData = {
   id: string;
   teamName: string;
+  submission: {
+    karmaGapLink: string;
+  } | null;
 };
 
 export default function SubmitModal({
   open,
   onOpenChange,
 }: SubmitModalProps) {
-  const [teams, setTeams] = React.useState<Team[]>([]);
-  const [loadingTeams, setLoadingTeams] = React.useState(false);
-  const [selectedTeamId, setSelectedTeamId] = React.useState("");
-  const [karmaGapLink, setKarmaGapLink] = React.useState("");
+  const [step, setStep] = React.useState<Step>("email");
+  const [email, setEmail] = React.useState("");
   const [status, setStatus] = React.useState<Status>("idle");
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [teamData, setTeamData] = React.useState<TeamData | null>(null);
+  const [karmaGapLink, setKarmaGapLink] = React.useState("");
 
-  const canSubmit = selectedTeamId && karmaGapLink.trim().length > 0;
-
-  // Fetch teams when modal opens
+  // Reset state when modal closes
   React.useEffect(() => {
-    if (open) {
-      setLoadingTeams(true);
-      fetch("/api/buildathon/teams")
-        .then(async (res) => {
-          if (!res.ok) return null;
-          return (await res.json()) as { teams?: Team[] };
-        })
-        .then((data) => {
-          setTeams(data?.teams || []);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch teams:", err);
-          setTeams([]);
-        })
-        .finally(() => {
-          setLoadingTeams(false);
-        });
+    if (!open) {
+      setStep("email");
+      setEmail("");
+      setStatus("idle");
+      setErrorMessage(null);
+      setTeamData(null);
+      setKarmaGapLink("");
     }
   }, [open]);
+
+  async function handleFindTeam(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch(
+        `/api/buildathon/team/find?email=${encodeURIComponent(email.trim())}`
+      );
+
+      if (res.ok) {
+        const data = (await res.json()) as { team: TeamData };
+        setTeamData(data.team);
+        setKarmaGapLink(data.team.submission?.karmaGapLink || "");
+        setStep("submit");
+        setStatus("idle");
+      } else {
+        const json = (await res.json()) as { error?: string };
+        setStatus("error");
+        setErrorMessage(
+          json?.error || "Team not found. Please check the email address."
+        );
+      }
+    } catch {
+      setStatus("error");
+      setErrorMessage("Network error. Please try again.");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,12 +86,6 @@ export default function SubmitModal({
     setErrorMessage(null);
 
     try {
-      if (!selectedTeamId) {
-        setStatus("error");
-        setErrorMessage("Please select a team.");
-        return;
-      }
-
       if (!karmaGapLink.trim()) {
         setStatus("error");
         setErrorMessage("Karma Gap link is required.");
@@ -90,18 +105,16 @@ export default function SubmitModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          teamId: selectedTeamId,
+          teamId: teamData?.id,
           karmaGapLink: karmaGapLink.trim(),
         }),
       });
 
       if (res.ok) {
         setStatus("success");
-        setSelectedTeamId("");
-        setKarmaGapLink("");
-        onOpenChange(false);
-        // Show success message
-        setTimeout(() => setStatus("idle"), 2000);
+        setTimeout(() => {
+          onOpenChange(false);
+        }, 2000);
       } else {
         setStatus("error");
         try {
@@ -123,67 +136,96 @@ export default function SubmitModal({
         <DialogHeader>
           <DialogTitle>Submit Project</DialogTitle>
           <DialogDescription>
-            Submit your Karma Gap link for your registered team.
+            {step === "email"
+              ? "Enter your team member email to find your team"
+              : `Submit your Karma Gap link for ${teamData?.teamName}`}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-6">
-          <Field label="Select your team *">
-            <select
-              value={selectedTeamId}
-              onChange={(e) => setSelectedTeamId(e.target.value)}
-              className={inputClassName}
-              disabled={loadingTeams || status === "loading"}
-              required
-            >
-              <option value="">
-                {loadingTeams ? "Loading teams..." : "-- Select a team --"}
-              </option>
-              {teams.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {team.teamName}
-                </option>
-              ))}
-            </select>
-          </Field>
+        {step === "email" ? (
+          <form onSubmit={handleFindTeam} className="mt-5 space-y-6">
+            <Field label="Team Member Email *">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClassName}
+                placeholder="team@example.com"
+                disabled={status === "loading"}
+              />
+              <p className="mt-1 text-xs text-black/60 dark:text-white/60">
+                Enter the email of any team member
+              </p>
+            </Field>
 
-          <Field label="Karma Gap Link *">
-            <input
-              type="url"
-              required
-              value={karmaGapLink}
-              onChange={(e) => setKarmaGapLink(e.target.value)}
-              className={inputClassName}
-              placeholder="https://gap.karmahq.xyz/..."
-              disabled={status === "loading"}
-            />
-            <p className="mt-1 text-xs text-black/60 dark:text-white/60">
-              Link to your Karma Gap project
-            </p>
-          </Field>
+            <div className="space-y-4">
+              <Button
+                type="submit"
+                disabled={status === "loading" || !email.trim()}
+                className="w-full rounded-full"
+              >
+                {status === "loading" ? "Finding team..." : "Find Team"}
+              </Button>
 
-          <div className="space-y-4">
-            <Button
-              type="submit"
-              disabled={status === "loading" || !canSubmit}
-              className="w-full rounded-full"
-            >
-              {status === "loading" ? "Submitting..." : "Submit"}
-            </Button>
+              {status === "error" && (
+                <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
+                  {errorMessage || "Error finding team. Please try again."}
+                </div>
+              )}
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="mt-5 space-y-6">
+            <div className="rounded-lg border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.02]">
+              <div className="text-sm font-medium">Team: {teamData?.teamName}</div>
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="mt-2 text-xs text-black/60 hover:text-foreground dark:text-white/60"
+              >
+                ← Change team
+              </button>
+            </div>
 
-            {status === "error" && (
-              <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
-                {errorMessage || "Error submitting. Please try again."}
-              </div>
-            )}
+            <Field label="Karma Gap Link *">
+              <input
+                type="url"
+                required
+                value={karmaGapLink}
+                onChange={(e) => setKarmaGapLink(e.target.value)}
+                className={inputClassName}
+                placeholder="https://gap.karmahq.xyz/..."
+                disabled={status === "loading"}
+              />
+              <p className="mt-1 text-xs text-black/60 dark:text-white/60">
+                Link to your Karma Gap project
+              </p>
+            </Field>
 
-            {status === "success" && (
-              <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
-                Submission successful!
-              </div>
-            )}
-          </div>
-        </form>
+            <div className="space-y-4">
+              <Button
+                type="submit"
+                disabled={status === "loading" || !karmaGapLink.trim()}
+                className="w-full rounded-full"
+              >
+                {status === "loading" ? "Submitting..." : teamData?.submission ? "Update Submission" : "Submit"}
+              </Button>
+
+              {status === "error" && (
+                <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
+                  {errorMessage || "Error submitting. Please try again."}
+                </div>
+              )}
+
+              {status === "success" && (
+                <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
+                  Submission successful!
+                </div>
+              )}
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
