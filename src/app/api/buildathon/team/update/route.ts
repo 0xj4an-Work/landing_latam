@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isValidEmail } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,15 @@ export async function PUT(request: Request) {
     if (invalidMembers.length > 0) {
       return NextResponse.json(
         { error: "All members must have name, email, and country" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format for all members
+    const membersWithInvalidEmail = members.filter((m) => !isValidEmail(m.memberEmail));
+    if (membersWithInvalidEmail.length > 0) {
+      return NextResponse.json(
+        { error: "Please provide valid email addresses for all team members (e.g., user@example.com)" },
         { status: 400 }
       );
     }

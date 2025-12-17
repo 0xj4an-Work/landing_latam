@@ -212,6 +212,8 @@ export default function EditTeamModal({
                 onChange={(e) => setEmail(e.target.value)}
                 className={inputClassName}
                 placeholder="member@example.com"
+                pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                title="Please enter a valid email address (e.g., user@example.com)"
                 disabled={status === "loading"}
               />
               <p className="mt-1 text-xs text-black/60 dark:text-white/60">
@@ -323,6 +325,8 @@ export default function EditTeamModal({
                           updateMember(index, "memberEmail", e.target.value)
                         }
                         placeholder="Email *"
+                        pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                        title="Please enter a valid email address (e.g., user@example.com)"
                         className={inputClassName}
                         disabled={status === "loading"}
                       />
