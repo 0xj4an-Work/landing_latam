@@ -74,11 +74,13 @@ export default function RegisterProjectModal({
   const [status, setStatus] = React.useState<Status>("idle");
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = React.useState(false);
 
   const canSubmit =
     teamName.trim().length > 0 &&
     walletAddress.trim().length > 0 &&
-    members.some((m) => m.memberName.trim().length > 0);
+    members.some((m) => m.memberName.trim().length > 0) &&
+    acceptedTerms;
 
   // Fetch teams when modal opens
   React.useEffect(() => {
@@ -110,6 +112,7 @@ export default function RegisterProjectModal({
       setTeamName("");
       setWalletAddress("");
       setMembers([{ memberName: "", memberEmail: "", memberGithub: "", country: "" }]);
+      setAcceptedTerms(false);
     } else {
       const team = teams.find((t) => t.id === teamId);
       if (team) {
@@ -125,6 +128,7 @@ export default function RegisterProjectModal({
             country: m.country || "",
           }))
         );
+        setAcceptedTerms(false);
       }
     }
   }
@@ -214,6 +218,7 @@ export default function RegisterProjectModal({
         setTeamName("");
         setWalletAddress("");
         setMembers([{ memberName: "", memberEmail: "", memberGithub: "", country: "" }]);
+        setAcceptedTerms(false);
         onOpenChange(false);
         setShowSuccessModal(true);
         setStatus("idle");
@@ -432,7 +437,42 @@ export default function RegisterProjectModal({
             </div>
 
             {(mode === "create" || mode === "edit") && (
-              <div className="mt-5 space-y-3">
+              <div className="mt-5 space-y-4">
+                <div className="flex items-start gap-3 rounded-lg border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5">
+                  <input
+                    type="checkbox"
+                    id="accept-terms"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-1 h-4 w-4 cursor-pointer rounded border-black/20 text-foreground focus:ring-2 focus:ring-black/20 dark:border-white/20 dark:focus:ring-white/25"
+                  />
+                  <label
+                    htmlFor="accept-terms"
+                    className="cursor-pointer text-sm text-black/80 dark:text-white/80"
+                  >
+                    I accept the{" "}
+                    <a
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-foreground underline hover:text-black/70 dark:hover:text-white/70"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Terms & Conditions
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-foreground underline hover:text-black/70 dark:hover:text-white/70"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Privacy Policy
+                    </a>
+                  </label>
+                </div>
+
                 <Button
                   type="submit"
                   disabled={status === "loading" || !canSubmit}

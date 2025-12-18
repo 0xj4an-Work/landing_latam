@@ -282,6 +282,53 @@ export default function Home() {
                 </Card>
               ))}
             </div>
+
+            {/* Timezone Disclosure */}
+            <div className="mt-16 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8 dark:border-amber-400/30 dark:bg-amber-400/5">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
+                    ⏰ Important: All times are in UTC
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-amber-800 dark:text-amber-200">
+                    <strong>UTC (Coordinated Universal Time)</strong> is the global time standard. All dates and deadlines for this buildathon are based on UTC to ensure fairness across all participating countries.
+                  </p>
+
+                  <div className="mt-4">
+                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                      UTC time conversions for Latin America:
+                    </p>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      <div className="rounded-lg bg-white/50 px-3 py-2 text-sm dark:bg-black/20">
+                        <span className="font-medium">🇲🇽 Mexico (CST/CDT):</span>
+                        <span className="ml-2 text-amber-800 dark:text-amber-200">UTC -6 / -5</span>
+                      </div>
+                      <div className="rounded-lg bg-white/50 px-3 py-2 text-sm dark:bg-black/20">
+                        <span className="font-medium">🇨🇴 Colombia:</span>
+                        <span className="ml-2 text-amber-800 dark:text-amber-200">UTC -5</span>
+                      </div>
+                      <div className="rounded-lg bg-white/50 px-3 py-2 text-sm dark:bg-black/20">
+                        <span className="font-medium">🇦🇷 Argentina:</span>
+                        <span className="ml-2 text-amber-800 dark:text-amber-200">UTC -3</span>
+                      </div>
+                      <div className="rounded-lg bg-white/50 px-3 py-2 text-sm dark:bg-black/20">
+                        <span className="font-medium">🇧🇷 Brazil (BRT/BRST):</span>
+                        <span className="ml-2 text-amber-800 dark:text-amber-200">UTC -3 / -2</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-4 text-xs text-amber-700 dark:text-amber-300">
+                    💡 <strong>Tip:</strong> When a deadline is "Jan 16, 2026 00:00 UTC", it means Jan 15 at 6:00 PM in Mexico City, 7:00 PM in Bogotá, and 9:00 PM in Buenos Aires/São Paulo. Use a <a href="https://www.timeanddate.com/worldclock/converter.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-900 dark:hover:text-amber-100">UTC converter</a> to check your local time.
+                  </p>
+                </div>
+              </div>
+            </div>
           </Container>
         </Section>
 

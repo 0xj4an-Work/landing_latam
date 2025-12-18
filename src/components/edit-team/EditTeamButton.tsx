@@ -21,13 +21,11 @@ export default function EditTeamButton({
 }) {
   const [open, setOpen] = React.useState(false);
 
-  // TEMP: Date restriction disabled for testing
   // Check if current date is within the edit period (Dec 17, 2025 - Feb 27, 2026 UTC)
-  // const now = new Date();
-  // const startDate = new Date("2025-12-17T00:00:00Z");
-  // const endDate = new Date("2026-02-27T23:59:59Z");
-  // const isEditPeriodActive = now >= startDate && now <= endDate;
-  const isEditPeriodActive = true; // Temporarily always enabled
+  const now = new Date();
+  const startDate = new Date("2025-12-17T00:00:00Z");
+  const endDate = new Date("2026-02-27T23:59:59Z");
+  const isEditPeriodActive = now >= startDate && now <= endDate;
 
   return (
     <>

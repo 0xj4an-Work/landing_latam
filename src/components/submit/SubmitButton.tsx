@@ -27,13 +27,11 @@ export default function SubmitButton({
     setMounted(true);
   }, []);
 
-  // TEMP: Date restriction disabled for testing
   // Check if current date is within the submission period (Jan 16 - Feb 27, 2026 UTC)
-  // const now = new Date();
-  // const startDate = new Date("2026-01-16T00:00:00Z");
-  // const endDate = new Date("2026-02-27T23:59:59Z");
-  // const isSubmissionPeriodActive = now >= startDate && now <= endDate;
-  const isSubmissionPeriodActive = true; // Temporarily always enabled
+  const now = new Date();
+  const startDate = new Date("2026-01-16T00:00:00Z");
+  const endDate = new Date("2026-02-27T23:59:59Z");
+  const isSubmissionPeriodActive = now >= startDate && now <= endDate;
 
   return (
     <>
