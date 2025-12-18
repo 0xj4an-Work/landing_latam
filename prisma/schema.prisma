@@ -36,12 +36,15 @@ model TeamMember {
 }
 
 model Submission {
-  id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  teamId       String   @unique
-  karmaGapLink String
-  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(cuid())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  teamId                String   @unique
+  karmaGapLink          String
+  trackOpenTrack        Boolean  @default(false)
+  trackFarcasterMiniapp Boolean  @default(false)
+  trackSelf             Boolean  @default(false)
+  team                  Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@map("submissions")
 }

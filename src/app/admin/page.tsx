@@ -20,6 +20,9 @@ type MemberRow = {
 type SubmissionRow = {
   id: string;
   karmaGapLink: string;
+  trackOpenTrack: boolean;
+  trackFarcasterMiniapp: boolean;
+  trackSelf: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -262,6 +265,23 @@ export default async function AdminPage() {
                             >
                               {team.submission.karmaGapLink}
                             </a>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {team.submission.trackOpenTrack && (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-purple-500/30 bg-purple-500/10 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300">
+                                  Open Track
+                                </span>
+                              )}
+                              {team.submission.trackFarcasterMiniapp && (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                                  Farcaster Miniapps
+                                </span>
+                              )}
+                              {team.submission.trackSelf && (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-pink-500/30 bg-pink-500/10 px-2.5 py-0.5 text-xs font-medium text-pink-700 dark:text-pink-300">
+                                  Self.xyz
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       )}
