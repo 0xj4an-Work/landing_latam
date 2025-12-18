@@ -254,9 +254,9 @@ export default function SubmitModal({
                     className="mt-0.5"
                   />
                   <div className="flex-1">
-                    <div className="text-sm font-medium">Farcaster Miniapps</div>
+                    <div className="text-sm font-medium">MiniApps (Farcaster/MiniPay)</div>
                     <div className="text-xs text-black/60 dark:text-white/60">
-                      Get exposure from Celo Account in Farcaster in their MiniApp Mondays!
+                      Build and launch a cool MiniApp on Farcaster or MiniPay and get exposure from Celo Account in Farcaster in their MiniApp Mondays!
                     </div>
                   </div>
                 </label>

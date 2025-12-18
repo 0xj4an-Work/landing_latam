@@ -105,7 +105,7 @@ export const TIMELINE = [
 
 export const TRACKS = [
   { title: "Open Track", description: "Anything goes—build what you're most excited about.", available: true },
-  { title: "Farcaster Miniapps", description: "Get exposure from Celo Account in Farcaster in their MiniApp Mondays!", available: true },
+  { title: "MiniApps (Farcaster/MiniPay)", description: "Build and launch a cool MiniApp on Farcaster or MiniPay and get exposure from Celo Account in Farcaster in their MiniApp Mondays!", available: true },
   { title: "Self", description: "Build with Self (identity/attestations—define your angle).", available: false },
 ] as const;
 
