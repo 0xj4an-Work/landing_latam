@@ -114,7 +114,7 @@ export const TIMELINE = [
 ] as const;
 
 export const TRACKS = [
-  { title: "Open Track", description: "Anything goes—build what you're most excited about.", available: true },
+  { title: "Open Track", description: "Anything goes—build what you're most excited about on Celo Mainnet (Testnet projects don't apply).", available: true },
   { title: "MiniApps (Farcaster/MiniPay)", description: "Build and launch a cool MiniApp on Farcaster or MiniPay and get exposure from Celo Account in Farcaster in their MiniApp Mondays!", available: true },
   {
     title: "Human.Tech",
@@ -199,8 +199,14 @@ export const FAQ = [
   },
 ] as const satisfies ReadonlyArray<FaqItem>;
 
-export const SPONSORS = [
-  { name: "Celo Latam Hubs", url: "https://latamhubs.lat" },
-  { name: "Celo Devs", url: "https://celo-devs.beehiiv.com/subscribe" },
-  { name: "Human.Tech", url: "https://human.tech" },
+export type Sponsor = {
+  name: string;
+  website?: string;
+};
+
+// TEST: Testing direct push to upstream/main - can be removed after verification
+export const SPONSORS: ReadonlyArray<Sponsor> = [
+  { name: "Celo Latam Hubs", website: "https://latamhubs.lat" },
+  { name: "Celo Devs", website: "https://celo-devs.beehiiv.com/subscribe" },
+  { name: "Human.Tech", website: "https://human.tech" },
 ] as const;
