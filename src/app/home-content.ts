@@ -222,7 +222,6 @@ export type Sponsor = {
 };
 
 export const SPONSORS: ReadonlyArray<Sponsor> = [
-  { name: "Celo Latam Hubs", website: "https://latamhubs.lat" },
   { name: "Celo Devs", website: "https://celo-devs.beehiiv.com/subscribe" },
   { name: "Human.Tech", website: "https://human.tech" },
 ] as const;
