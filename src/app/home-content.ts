@@ -92,6 +92,15 @@ export const RESOURCES: Record<
         },
       ],
     },
+    {
+      title: "Celo Builders PT",
+      links: [
+        {
+          label: "Celo Builders PT - Recursos e Guias",
+          url: "https://striped-track-8f3.notion.site/Celo-Builders-PT-2e11710eea9e81c69edcd7e2158c97be",
+        },
+      ],
+    },
   ],
 } as const;
 
@@ -114,7 +123,7 @@ export const TIMELINE = [
 ] as const;
 
 export const TRACKS = [
-  { title: "Open Track", description: "Anything goes—build what you're most excited about.", available: true },
+  { title: "Open Track", description: "Anything goes, build what you're most excited about.", available: true },
   { title: "MiniApps (Farcaster/MiniPay)", description: "Build and launch a cool MiniApp on Farcaster or MiniPay and get exposure from Celo Account in Farcaster in their MiniApp Mondays!", available: true },
   {
     title: "Human.Tech",
