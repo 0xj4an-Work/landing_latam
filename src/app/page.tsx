@@ -43,7 +43,8 @@ import {
   RESOURCES,
   SPONSORS,
   TIMELINE,
-  TRACKS,
+  MAIN_TRACKS,
+  SPONSOR_BOUNTIES,
 } from "@/app/home-content";
 
 const TRACK_REQUIREMENTS = {
@@ -66,27 +67,32 @@ const TRACK_REQUIREMENTS = {
     ],
   },
   "Human.Tech": {
-    title: "Human.Tech Track Requirements",
+    title: "Human.Tech Bounty Requirements & Prizes",
     requirements: [
-      "Integrate Human.Tech stack (WaaP or Human Passport)",
-      "Demonstrate identity verification or proof-of-personhood features",
-      "Follow Human.Tech documentation: https://docs.human.tech/",
-      "Show clear usage of Human.Tech in your demo",
+      "WaaP Option: Integrate WaaP (https://docs.waap.xyz) for wallet login flow - enable embedded wallets or connect existing wallets",
+      "Passport Option: Integrate Passport (https://docs.passport.xyz) for Sybil resistance, proof-of-personhood, or compliance use cases",
+      "Recommended: Use Passport Embeds (https://docs.passport.xyz/building-with-passport/embed/introduction)",
+      "Show clear usage of WaaP or Passport in your demo video",
+      "Passport Prizes: 2 winners × $250 USDC each (best integrations with embeds)",
+      "WaaP Prizes: 5 winners × $100 USDC each (best wallet login flows)",
     ],
   },
   "v0": {
-    title: "v0 Track Requirements",
+    title: "v0 Bounty Requirements & Prizes",
     requirements: [
       "Build your project using v0 by Vercel",
       "Enable and display the 'Show v0 branding' badge on your deployed site",
       "Publish your project as a public template in the v0 directory",
       "Submit your template URL: https://v0.app/templates",
+      "Prizes: 1st ($500), 2nd ($300), 3rd ($200) in v0 credits",
+      "Bonus: Attend VibeCoding workshops to receive $10 USD in v0 credits (200 codes available)",
     ],
   },
 } as const;
 
 export default function Home() {
   const [showTrackInfo, setShowTrackInfo] = React.useState<string | null>(null);
+  const [showPrizeBreakdowns, setShowPrizeBreakdowns] = React.useState(false);
   const iconByKey = {
     rocket: <RocketIcon className="h-5 w-5" />,
     globe: <GlobeIcon className="h-5 w-5" />,
@@ -236,9 +242,9 @@ export default function Home() {
               </div>
 
               <div className="mt-3 sm:mt-4 grid gap-3 sm:gap-4 grid-cols-3">
-                <Stat label="1st place" value="TBA" />
-                <Stat label="2nd place" value="TBA" />
-                <Stat label="3rd place" value="TBA" />
+                <Stat label="Main Prize Pool" value="8,000 CELO" />
+                <Stat label="Human.Tech Bounty" value="1,000 USDC" />
+                <Stat label="v0 Bounty" value="$1,000 Credits" />
               </div>
 
               <div className="mt-16 grid gap-6 sm:grid-cols-2">
@@ -512,6 +518,25 @@ export default function Home() {
                   </RuleItem>
                 </li>
               </ul>
+              
+              <div className="mt-6 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-1">
+                      ⚡ Mainnet Activity Bonus
+                    </div>
+                    <p className="text-sm text-emerald-800 dark:text-emerald-200">
+                      Projects generating the most transactions on Celo Mainnet receive <span className="font-semibold">special consideration for higher prizes</span>. All transactions count until the last day of the buildathon (Feb 27, 2026). Deploy early and encourage real usage!
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
               <div className="mt-4 text-xs text-[color:var(--celo-muted)]">
                 Notes: you can register without a GitHub repo and add it later. For final submission, ensure your
                 project is deployed on Celo Mainnet and your Karma Gap profile contains all required links.
@@ -523,93 +548,345 @@ export default function Home() {
         <Section id="tracks" className="scroll-mt-20">
           <Container>
             <SectionHeader
-              title="Available track(s)."
-              description="You can apply to as many tracks as you want. Pick the tracks that best match your app and integrations."
+              title="Competition tracks."
+              description="Compete in our main tracks for 8,000 CELO in prizes, or participate in sponsor bounties for additional rewards."
             />
 
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {TRACKS.map((t) => (
-                <Card
-                  key={t.title}
-                  className={cn(
-                    "group p-8 transition-all",
-                    t.available
-                      ? "hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5"
-                      : "opacity-60",
-                    t.title === "Open Track"
-                      ? "border-[color:var(--celo-yellow)]/40 ring-2 ring-[color:var(--celo-yellow-weak)] dark:ring-[color:var(--celo-yellow)]/30"
-                      : undefined,
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <div className="text-base font-semibold">{t.title}</div>
-                      {t.title in TRACK_REQUIREMENTS && (
-                        <button
-                          onClick={() => setShowTrackInfo(t.title)}
-                          className="text-black/40 hover:text-black/60 dark:text-white/40 dark:hover:text-white/60 transition-colors"
-                          aria-label="View requirements"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </button>
-                      )}
+            {/* Main Tracks */}
+            <div className="mt-10">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="text-lg font-semibold">Main Tracks</div>
+                <span className="rounded-full border border-[color:var(--celo-yellow)]/50 bg-[var(--celo-yellow-weak)] px-3 py-1 text-xs font-semibold text-foreground shadow-sm">
+                  8,000 CELO Prize Pool
+                </span>
+              </div>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {MAIN_TRACKS.map((t) => (
+                  <Card
+                    key={t.title}
+                    className={cn(
+                      "group p-8 transition-all",
+                      t.available
+                        ? "hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5"
+                        : "opacity-60",
+                      t.title === "Open Track"
+                        ? "border-[color:var(--celo-yellow)]/40 ring-2 ring-[color:var(--celo-yellow-weak)] dark:ring-[color:var(--celo-yellow)]/30"
+                        : undefined,
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="text-base font-semibold">{t.title}</div>
+                        {t.title in TRACK_REQUIREMENTS && (
+                          <button
+                            onClick={() => setShowTrackInfo(t.title)}
+                            className="text-black/40 hover:text-black/60 dark:text-white/40 dark:hover:text-white/60 transition-colors"
+                            aria-label="View requirements"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      <div>
+                        {t.available && t.title === "Open Track" ? (
+                          <span className="rounded-full border border-[color:var(--celo-yellow)]/50 bg-[var(--celo-yellow-weak)] px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
+                            Recommended
+                          </span>
+                        ) : !t.available ? (
+                          <span className="rounded-full border border-black/10 bg-black/5 px-2.5 py-1 text-[11px] font-medium text-black/60 dark:border-white/10 dark:bg-white/5 dark:text-white/60">
+                            Not available
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
-                    <div>
-                      {t.available && t.title === "Open Track" ? (
-                        <span className="rounded-full border border-[color:var(--celo-yellow)]/50 bg-[var(--celo-yellow-weak)] px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
-                          Recommended
-                        </span>
-                      ) : !t.available ? (
+                    <p className="mt-4 text-sm leading-relaxed text-black/70 dark:text-white/70">
+                      {t.description}
+                    </p>
+                    <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/5">
+                      <div className="text-sm font-semibold text-[color:var(--celo-yellow)]">Main Prize Pool</div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Sponsor Bounties */}
+            <div className="mt-16">
+              <div className="mb-6">
+                <div className="text-lg font-semibold mb-2">Sponsor Bounties</div>
+                <p className="text-sm text-black/70 dark:text-white/70">
+                  Build with our sponsor technologies and compete for additional prizes. Projects can win in both main tracks and sponsor bounties.
+                </p>
+              </div>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {SPONSOR_BOUNTIES.map((t) => (
+                  <Card
+                    key={t.title}
+                    className={cn(
+                      "group p-8 transition-all",
+                      t.available
+                        ? "hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5"
+                        : "opacity-60",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="text-base font-semibold">{t.title}</div>
+                        {t.title in TRACK_REQUIREMENTS && (
+                          <button
+                            onClick={() => setShowTrackInfo(t.title)}
+                            className="text-black/40 hover:text-black/60 dark:text-white/40 dark:hover:text-white/60 transition-colors"
+                            aria-label="View requirements"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      {!t.available && (
                         <span className="rounded-full border border-black/10 bg-black/5 px-2.5 py-1 text-[11px] font-medium text-black/60 dark:border-white/10 dark:bg-white/5 dark:text-white/60">
                           Not available
                         </span>
-                      ) : null}
+                      )}
                     </div>
-                  </div>
-                  <p className="mt-4 text-sm leading-relaxed text-black/70 dark:text-white/70">
-                    {t.description}
-                  </p>
-                  {("logoLight" in t && "logoDark" in t) && (() => {
-                    const track = t as typeof t & { logoLight: string; logoDark: string; logoUrl?: string };
-                    const logoContent = (
-                      <>
-                        <Image
-                          src={track.logoLight}
-                          alt={`${track.title} logo`}
-                          width={80}
-                          height={20}
-                          className="h-5 w-auto object-contain dark:hidden"
-                        />
-                        <Image
-                          src={track.logoDark}
-                          alt={`${track.title} logo`}
-                          width={80}
-                          height={20}
-                          className="hidden h-5 w-auto object-contain dark:block"
-                        />
-                      </>
-                    );
-                    return (
-                      <div className="mt-4">
-                        {track.logoUrl ? (
-                          <a
-                            href={track.logoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block transition-opacity hover:opacity-70"
-                          >
-                            {logoContent}
-                          </a>
-                        ) : (
-                          logoContent
+                    <p className="mt-4 text-sm leading-relaxed text-black/70 dark:text-white/70">
+                      {t.description}
+                    </p>
+                    {("logoLight" in t && "logoDark" in t) && (() => {
+                      const track = t as typeof t & { logoLight: string; logoDark: string; logoUrl?: string };
+                      const isHumanTech = track.title === "Human.Tech";
+                      const logoHeight = isHumanTech ? "h-7" : "h-5";
+                      const logoContent = (
+                        <>
+                          <Image
+                            src={track.logoLight}
+                            alt={`${track.title} logo`}
+                            width={isHumanTech ? 112 : 80}
+                            height={isHumanTech ? 28 : 20}
+                            className={`${logoHeight} w-auto object-contain dark:hidden`}
+                          />
+                          <Image
+                            src={track.logoDark}
+                            alt={`${track.title} logo`}
+                            width={isHumanTech ? 112 : 80}
+                            height={isHumanTech ? 28 : 20}
+                            className={`hidden ${logoHeight} w-auto object-contain dark:block`}
+                          />
+                        </>
+                      );
+                      return (
+                        <div className="mt-4">
+                          {track.logoUrl ? (
+                            <a
+                              href={track.logoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block transition-opacity hover:opacity-70"
+                            >
+                              {logoContent}
+                            </a>
+                          ) : (
+                            logoContent
+                          )}
+                        </div>
+                      );
+                    })()}
+                    {"prize" in t && (
+                      <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/5">
+                        <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{t.prize}</div>
+                        {"prizeDetails" in t && (
+                          <div className="text-xs text-black/60 dark:text-white/60 mt-1">{t.prizeDetails}</div>
                         )}
                       </div>
-                    );
-                  })()}
-                </Card>
-              ))}
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </Container>
+        </Section>
+
+        <Section id="prizes" className="scroll-mt-20">
+          <Container>
+            <SectionHeader
+              title="Prize breakdown."
+              description="Compete for 8,000 CELO in main tracks plus $2,000 USD in sponsor bounties. Apply to all categories that match your project!"
+            />
+
+            {/* Mainnet Activity Bonus Notice */}
+            <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-950/30 dark:to-cyan-950/30 border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="text-lg font-semibold text-emerald-900 dark:text-emerald-100 mb-2">
+                    ⚡ Mainnet Activity Matters!
+                  </div>
+                  <p className="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed">
+                    Projects generating the <span className="font-semibold">most transactions on Celo Mainnet</span> receive special consideration for higher prizes. This demonstrates real usage and engagement. All transactions count from buildathon start until the last day (<span className="font-semibold">Feb 27, 2026</span>). <span className="font-semibold">Deploy early and encourage users to interact with your dApp!</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 grid gap-8 lg:grid-cols-2">
+              {/* Main Prize Pool */}
+              <Card className="p-8 border-[color:var(--celo-yellow)]/40 ring-2 ring-[color:var(--celo-yellow-weak)] dark:ring-[color:var(--celo-yellow)]/30">
+                <div className="mb-6">
+                  <div className="text-lg font-semibold mb-2">Main Prize Pool</div>
+                  <div className="text-3xl font-bold text-[color:var(--celo-yellow)]">8,000 CELO</div>
+                  <p className="text-sm text-black/70 dark:text-white/70 mt-2">
+                    For Open Track and MiniApps projects
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
+                    <span className="text-sm font-medium">Distribution</span>
+                    <span className="text-sm text-black/70 dark:text-white/70">Split among top projects</span>
+                  </div>
+                  <div className="text-xs text-black/60 dark:text-white/60 mt-4">
+                    Prize amounts will be announced closer to winners date. Projects can compete in both Open Track and MiniApps simultaneously.
+                  </div>
+                </div>
+              </Card>
+
+              {/* Sponsor Bounties Summary */}
+              <Card className="p-8">
+                <div className="mb-6">
+                  <div className="text-lg font-semibold mb-2">Sponsor Bounties</div>
+                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">$2,000 USD</div>
+                  <p className="text-sm text-black/70 dark:text-white/70 mt-2">
+                    In USDC and v0 credits
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
+                    <span className="text-sm font-medium">Human.Tech</span>
+                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">$1,000 USDC</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
+                    <span className="text-sm font-medium">v0 by Vercel</span>
+                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">$1,000 USD</span>
+                  </div>
+                  <div className="text-xs text-black/60 dark:text-white/60 mt-4">
+                    Win prizes from main tracks AND sponsor bounties. One project can win in multiple categories!
+                  </div>
+                </div>
+              </Card>
+
+              {/* Human.Tech Breakdown */}
+              <Card className="p-8">
+                <button
+                  onClick={() => setShowPrizeBreakdowns(!showPrizeBreakdowns)}
+                  className="w-full flex items-center justify-between gap-3 mb-6 group"
+                >
+                  <div className="text-lg font-semibold text-left">Human.Tech Prize Breakdown</div>
+                  <svg 
+                    className={cn(
+                      "w-5 h-5 text-black/40 dark:text-white/40 transition-transform group-hover:text-black/60 dark:group-hover:text-white/60",
+                      showPrizeBreakdowns && "rotate-180"
+                    )} 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {showPrizeBreakdowns && (() => {
+                  const humanTechBounty = SPONSOR_BOUNTIES.find(b => b.title === "Human.Tech");
+                  return (
+                    <>
+                      <div className="space-y-3">
+                        {humanTechBounty && "prizeBreakdown" in humanTechBounty && humanTechBounty.prizeBreakdown?.map((prize, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{prize.place}</div>
+                              <div className="text-xs text-black/60 dark:text-white/60 mt-0.5">{prize.description}</div>
+                            </div>
+                            <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                              {prize.amount}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                        <p className="text-xs text-blue-800 dark:text-blue-200">
+                          💡 Two separate categories: Passport (2 prizes of $250 each) focuses on Sybil resistance with embeds, and WaaP (5 prizes of $100 each) for wallet login flows.
+                        </p>
+                      </div>
+                    </>
+                  );
+                })()}
+                
+                {!showPrizeBreakdowns && (
+                  <div className="text-sm text-black/60 dark:text-white/60">
+                    2 prizes of $250 for Human.Passport + 5 prizes of $100 for WaaP. Click to see details.
+                  </div>
+                )}
+              </Card>
+
+              {/* v0 Breakdown */}
+              <Card className="p-8">
+                <button
+                  onClick={() => setShowPrizeBreakdowns(!showPrizeBreakdowns)}
+                  className="w-full flex items-center justify-between gap-3 mb-6 group"
+                >
+                  <div className="text-lg font-semibold text-left">v0 Prize Breakdown</div>
+                  <svg 
+                    className={cn(
+                      "w-5 h-5 text-black/40 dark:text-white/40 transition-transform group-hover:text-black/60 dark:group-hover:text-white/60",
+                      showPrizeBreakdowns && "rotate-180"
+                    )} 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {showPrizeBreakdowns && (() => {
+                  const v0Bounty = SPONSOR_BOUNTIES.find(b => b.title === "v0");
+                  return (
+                    <>
+                      <div className="space-y-3">
+                        {v0Bounty && "prizeBreakdown" in v0Bounty && v0Bounty.prizeBreakdown?.map((prize, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{prize.place}</div>
+                              <div className="text-xs text-black/60 dark:text-white/60 mt-0.5">{prize.description}</div>
+                            </div>
+                            <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                              {prize.amount}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
+                        <p className="text-xs text-purple-800 dark:text-purple-200">
+                          🎁 Bonus: 200 codes of $10 USD in v0 credits available for VibeCoding workshop participants!
+                        </p>
+                      </div>
+                    </>
+                  );
+                })()}
+                
+                {!showPrizeBreakdowns && (
+                  <div className="text-sm text-black/60 dark:text-white/60">
+                    $500 + $300 + $200 in v0 credits + 200 workshop bonus codes. Click to see details.
+                  </div>
+                )}
+              </Card>
             </div>
           </Container>
         </Section>
