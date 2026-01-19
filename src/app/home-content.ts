@@ -93,6 +93,23 @@ export const RESOURCES: Record<
         },
       ],
     },
+    {
+      title: "v0 by Vercel",
+      links: [
+        {
+          label: "v0 Documentation",
+          url: "https://v0.dev/docs",
+        },
+        {
+          label: "v0 Templates Directory",
+          url: "https://v0.app/templates",
+        },
+        {
+          label: "Getting Started with v0",
+          url: "https://v0.dev",
+        },
+      ],
+    },
   ],
   portuguese: [
     {
