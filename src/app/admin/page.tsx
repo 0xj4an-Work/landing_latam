@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Container } from "@/components/section";
 import { AdminDeleteButton } from "@/components/admin/AdminDeleteButtons";
 import { CountryStats } from "@/components/admin/CountryStats";
+import { ExportEmailsButton } from "@/components/admin/ExportEmailsButton";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -103,6 +104,7 @@ export default async function AdminPage() {
         <Container className="flex h-16 items-center justify-between">
           <h1 className="text-lg font-semibold">Admin Dashboard</h1>
           <div className="flex items-center gap-3">
+            <ExportEmailsButton />
             <LogoutButton />
             <Link
               href="/"

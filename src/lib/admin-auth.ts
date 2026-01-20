@@ -93,3 +93,18 @@ export async function isValidAdminSessionCookieValue(value: string | undefined |
   return safeEqual(sig, expected);
 }
 
+export async function verifyAdminSession(request: Request) {
+  const cookieHeader = request.headers.get("cookie");
+  if (!cookieHeader) return false;
+
+  const cookies = Object.fromEntries(
+    cookieHeader.split("; ").map((c) => {
+      const [key, ...values] = c.split("=");
+      return [key, values.join("=")];
+    })
+  );
+
+  const sessionCookie = cookies[COOKIE_NAME];
+  return await isValidAdminSessionCookieValue(sessionCookie);
+}
+
