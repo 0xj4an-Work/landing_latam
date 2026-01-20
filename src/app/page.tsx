@@ -49,21 +49,25 @@ import {
 
 const TRACK_REQUIREMENTS = {
   "Open Track": {
-    title: "Open Track Requirements",
+    title: "Open Track Requirements & Prizes",
     requirements: [
       "Build anything you're excited about on Celo",
-      "Deploy your project to a live environment",
+      "IMPORTANT: Only NEW projects are eligible (no existing projects)",
+      "Deploy your project to a live environment on Celo Mainnet",
       "Include your project in Karma Gap with GitHub repo, deck, and demo video",
       "Submit before the deadline (Feb 27, 2026)",
+      "Prizes: 1st (1K CELO + 200 cUSD), 2nd (700 CELO + 70 cUSD), 3rd (300 CELO + 30 cUSD)",
     ],
   },
   "MiniApps (Farcaster/MiniPay)": {
-    title: "MiniApps Track Requirements",
+    title: "MiniApps Track Requirements & Prizes",
     requirements: [
       "Build and launch a MiniApp on Farcaster or MiniPay",
+      "Existing projects are ALLOWED in this track",
       "MiniApp must be functional and accessible",
       "Get potential exposure from Celo Account on MiniApp Mondays",
       "Include demo video showing MiniApp functionality",
+      "Prizes: 1st (3K CELO + 300 cUSD), 2nd (2K CELO + 150 cUSD), 3rd (1K CELO + 50 cUSD)",
     ],
   },
   "Human.Tech": {
@@ -73,8 +77,8 @@ const TRACK_REQUIREMENTS = {
       "Passport Option: Integrate Passport (https://docs.passport.xyz) for Sybil resistance, proof-of-personhood, or compliance use cases",
       "Recommended: Use Passport Embeds (https://docs.passport.xyz/building-with-passport/embed/introduction)",
       "Show clear usage of WaaP or Passport in your demo video",
-      "Passport Prizes: 2 winners × $250 USDC each (best integrations with embeds)",
-      "WaaP Prizes: 5 winners × $100 USDC each (best wallet login flows)",
+      "Passport Prizes: 2 winners × 250 USDC each (best integrations with embeds)",
+      "WaaP Prizes: 5 winners × 100 USDC each (best wallet login flows)",
     ],
   },
   "v0": {
@@ -84,8 +88,8 @@ const TRACK_REQUIREMENTS = {
       "Enable and display the 'Show v0 branding' badge on your deployed site",
       "Publish your project as a public template in the v0 directory",
       "Submit your template URL: https://v0.app/templates",
-      "Prizes: 1st ($500), 2nd ($300), 3rd ($200) in v0 credits",
-      "Bonus: Attend VibeCoding workshops to receive $10 USD in v0 credits (200 codes available)",
+      "Prizes: 1st (500), 2nd (300), 3rd (200) in v0 credits",
+      "Bonus: Attend VibeCoding workshops to receive 10 USD in v0 credits (200 codes available)",
     ],
   },
 } as const;
@@ -242,9 +246,9 @@ export default function Home() {
               </div>
 
               <div className="mt-3 sm:mt-4 grid gap-3 sm:gap-4 grid-cols-3">
-                <Stat label="Main Prize Pool" value="8,000 CELO" />
+                <Stat label="Main Prize Pool" value="8,000 CELO + 800 cUSD" />
                 <Stat label="Human.Tech Bounty" value="1,000 USDC" />
-                <Stat label="v0 Bounty" value="$1,000 Credits" />
+                <Stat label="v0 Bounty" value="1,000 Credits" />
               </div>
 
               <div className="mt-16 grid gap-6 sm:grid-cols-2">
@@ -549,7 +553,7 @@ export default function Home() {
           <Container>
             <SectionHeader
               title="Competition tracks."
-              description="Compete in our main tracks for 8,000 CELO in prizes, or participate in sponsor bounties for additional rewards."
+              description="Compete in our main tracks for 8,000 CELO + 800 cUSD in prizes, or participate in sponsor bounties for additional rewards."
             />
 
             {/* Main Tracks */}
@@ -557,7 +561,7 @@ export default function Home() {
               <div className="mb-6 flex items-center gap-3">
                 <div className="text-lg font-semibold">Main Tracks</div>
                 <span className="rounded-full border border-[color:var(--celo-yellow)]/50 bg-[var(--celo-yellow-weak)] px-3 py-1 text-xs font-semibold text-foreground shadow-sm">
-                  8,000 CELO Prize Pool
+                  8,000 CELO + 800 cUSD Prize Pool
                 </span>
               </div>
               <div className="grid gap-6 sm:grid-cols-2">
@@ -590,22 +594,28 @@ export default function Home() {
                         )}
                       </div>
                       <div>
-                        {t.available && t.title === "Open Track" ? (
-                          <span className="rounded-full border border-[color:var(--celo-yellow)]/50 bg-[var(--celo-yellow-weak)] px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
-                            Recommended
-                          </span>
-                        ) : !t.available ? (
+                        {!t.available && (
                           <span className="rounded-full border border-black/10 bg-black/5 px-2.5 py-1 text-[11px] font-medium text-black/60 dark:border-white/10 dark:bg-white/5 dark:text-white/60">
                             Not available
                           </span>
-                        ) : null}
+                        )}
                       </div>
                     </div>
                     <p className="mt-4 text-sm leading-relaxed text-black/70 dark:text-white/70">
                       {t.description}
                     </p>
                     <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/5">
-                      <div className="text-sm font-semibold text-[color:var(--celo-yellow)]">Main Prize Pool</div>
+                      <div className="text-xl font-bold text-[color:var(--celo-yellow)] mb-1">{t.prize}</div>
+                      {"prizeBreakdown" in t && t.prizeBreakdown && (
+                        <div className="mt-3 space-y-1.5 text-xs text-black/70 dark:text-white/70">
+                          {t.prizeBreakdown.map((prize, idx) => (
+                            <div key={idx} className="flex items-center justify-between">
+                              <span>{prize.place}:</span>
+                              <span className="font-semibold">{prize.amount}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </Card>
                 ))}
@@ -713,7 +723,7 @@ export default function Home() {
           <Container>
             <SectionHeader
               title="Prize breakdown."
-              description="Compete for 8,000 CELO in main tracks plus $2,000 USD in sponsor bounties. Apply to all categories that match your project!"
+              description="Compete for 8,000 CELO + 800 cUSD in main tracks plus 2,000 USD in sponsor bounties. Apply to all categories that match your project!"
             />
 
             {/* Mainnet Activity Bonus Notice */}
@@ -742,18 +752,27 @@ export default function Home() {
               <Card className="p-8 border-[color:var(--celo-yellow)]/40 ring-2 ring-[color:var(--celo-yellow-weak)] dark:ring-[color:var(--celo-yellow)]/30">
                 <div className="mb-6">
                   <div className="text-lg font-semibold mb-2">Main Prize Pool</div>
-                  <div className="text-3xl font-bold text-[color:var(--celo-yellow)]">8,000 CELO</div>
+                  <div className="text-3xl font-bold text-[color:var(--celo-yellow)]">8,000 CELO + 800 cUSD</div>
                   <p className="text-sm text-black/70 dark:text-white/70 mt-2">
-                    For Open Track and MiniApps projects
+                    For Open Track (new projects only) and MiniApps (existing projects allowed)
                   </p>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
-                    <span className="text-sm font-medium">Distribution</span>
-                    <span className="text-sm text-black/70 dark:text-white/70">Split among top projects</span>
+                  <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
+                    <div className="text-sm font-medium mb-2">Open Track (2K CELO + 300 cUSD)</div>
+                    <div className="text-xs text-black/70 dark:text-white/70 space-y-1">
+                      <div>🥇 1st: 1,000 CELO + 200 cUSD</div>
+                      <div>🥈 2nd: 700 CELO + 70 cUSD</div>
+                      <div>🥉 3rd: 300 CELO + 30 cUSD</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-black/60 dark:text-white/60 mt-4">
-                    Prize amounts will be announced closer to winners date. Projects can compete in both Open Track and MiniApps simultaneously.
+                  <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
+                    <div className="text-sm font-medium mb-2">MiniApps Track (6K CELO + 500 cUSD)</div>
+                    <div className="text-xs text-black/70 dark:text-white/70 space-y-1">
+                      <div>🥇 1st: 3,000 CELO + 300 cUSD</div>
+                      <div>🥈 2nd: 2,000 CELO + 150 cUSD</div>
+                      <div>🥉 3rd: 1,000 CELO + 50 cUSD</div>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -762,7 +781,7 @@ export default function Home() {
               <Card className="p-8">
                 <div className="mb-6">
                   <div className="text-lg font-semibold mb-2">Sponsor Bounties</div>
-                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">$2,000 USD</div>
+                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">2,000 USD</div>
                   <p className="text-sm text-black/70 dark:text-white/70 mt-2">
                     In USDC and v0 credits
                   </p>
@@ -770,11 +789,11 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
                     <span className="text-sm font-medium">Human.Tech</span>
-                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">$1,000 USDC</span>
+                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">1,000 USDC</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
                     <span className="text-sm font-medium">v0 by Vercel</span>
-                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">$1,000 USD</span>
+                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">1,000 USD</span>
                   </div>
                   <div className="text-xs text-black/60 dark:text-white/60 mt-4">
                     Win prizes from main tracks AND sponsor bounties. One project can win in multiple categories!
@@ -821,7 +840,7 @@ export default function Home() {
                       </div>
                       <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
                         <p className="text-xs text-blue-800 dark:text-blue-200">
-                          💡 Two separate categories: Passport (2 prizes of $250 each) focuses on Sybil resistance with embeds, and WaaP (5 prizes of $100 each) for wallet login flows.
+                          💡 Two separate categories: Passport (2 prizes of 250 each) focuses on Sybil resistance with embeds, and WaaP (5 prizes of 100 each) for wallet login flows.
                         </p>
                       </div>
                     </>
@@ -830,7 +849,7 @@ export default function Home() {
                 
                 {!showPrizeBreakdowns && (
                   <div className="text-sm text-black/60 dark:text-white/60">
-                    2 prizes of $250 for Human.Passport + 5 prizes of $100 for WaaP. Click to see details.
+                    2 prizes of 250 USDC for Human.Passport + 5 prizes of 100 USDC for WaaP. Click to see details.
                   </div>
                 )}
               </Card>
@@ -874,7 +893,7 @@ export default function Home() {
                       </div>
                       <div className="mt-4 p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
                         <p className="text-xs text-purple-800 dark:text-purple-200">
-                          🎁 Bonus: 200 codes of $10 USD in v0 credits available for VibeCoding workshop participants!
+                          🎁 Bonus: 200 codes of 10 USD in v0 credits available for VibeCoding workshop participants!
                         </p>
                       </div>
                     </>
@@ -883,7 +902,7 @@ export default function Home() {
                 
                 {!showPrizeBreakdowns && (
                   <div className="text-sm text-black/60 dark:text-white/60">
-                    $500 + $300 + $200 in v0 credits + 200 workshop bonus codes. Click to see details.
+                    500 USD + 300 USD + 200 USD in v0 credits + 200 workshop bonus codes. Click to see details.
                   </div>
                 )}
               </Card>

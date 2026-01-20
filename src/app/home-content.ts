@@ -152,19 +152,29 @@ export const TIMELINE = [
 ] as const;
 
 export const MAIN_TRACKS = [
-  { 
-    title: "Open Track", 
-    description: "Anything goes, build what you're most excited about.", 
+  {
+    title: "Open Track",
+    description: "Anything goes, build what you're most excited about. Only new projects are eligible for this track.",
     available: true,
-    prize: "8,000 CELO",
-    prizeDetails: "Split among top projects"
+    prize: "2,000 CELO + 300 cUSD",
+    prizeDetails: "1st: 1K CELO + 200 cUSD | 2nd: 700 CELO + 70 cUSD | 3rd: 300 CELO + 30 cUSD",
+    prizeBreakdown: [
+      { place: "1st Place", amount: "1,000 CELO + 200 cUSD", description: "Best Open Track project" },
+      { place: "2nd Place", amount: "700 CELO + 70 cUSD", description: "Outstanding Open Track project" },
+      { place: "3rd Place", amount: "300 CELO + 30 cUSD", description: "Great Open Track project" }
+    ]
   },
-  { 
-    title: "MiniApps (Farcaster/MiniPay)", 
-    description: "Build and launch a cool MiniApp on Farcaster or MiniPay and get exposure from Celo Account in Farcaster in their MiniApp Mondays!", 
+  {
+    title: "MiniApps (Farcaster/MiniPay)",
+    description: "Build and launch a cool MiniApp on Farcaster or MiniPay and get exposure from Celo Account in Farcaster in their MiniApp Mondays! Existing projects are allowed in this track.",
     available: true,
-    prize: "Part of 8,000 CELO pool",
-    prizeDetails: "Best MiniApp projects"
+    prize: "6,000 CELO + 500 cUSD",
+    prizeDetails: "1st: 3K CELO + 300 cUSD | 2nd: 2K CELO + 150 cUSD | 3rd: 1K CELO + 50 cUSD",
+    prizeBreakdown: [
+      { place: "1st Place", amount: "3,000 CELO + 300 cUSD", description: "Best MiniApp project" },
+      { place: "2nd Place", amount: "2,000 CELO + 150 cUSD", description: "Outstanding MiniApp project" },
+      { place: "3rd Place", amount: "1,000 CELO + 50 cUSD", description: "Great MiniApp project" }
+    ]
   },
 ] as const;
 
@@ -177,31 +187,31 @@ export const SPONSOR_BOUNTIES = [
     logoDark: "/human.tech_logo_white.svg",
     logoUrl: "https://human.tech",
     prize: "1,000 USDC",
-    prizeDetails: "2x $250 (Passport) + 5x $100 (WaaP)",
+    prizeDetails: "2x 250 USDC (Passport) + 5x 100 USDC (WaaP)",
     prizeBreakdown: [
-      { place: "Best Passport Integration #1", amount: "$250 USDC", description: "Top Human Passport integration with embeds" },
-      { place: "Best Passport Integration #2", amount: "$250 USDC", description: "Outstanding Passport integration" },
-      { place: "Best WaaP Integration #1", amount: "$100 USDC", description: "Top WaaP wallet login flow" },
-      { place: "Best WaaP Integration #2", amount: "$100 USDC", description: "Great WaaP wallet login flow" },
-      { place: "Best WaaP Integration #3", amount: "$100 USDC", description: "Great WaaP wallet login flow" },
-      { place: "Best WaaP Integration #4", amount: "$100 USDC", description: "Great WaaP wallet login flow" },
-      { place: "Best WaaP Integration #5", amount: "$100 USDC", description: "Great WaaP wallet login flow" }
+      { place: "Best Passport Integration #1", amount: "250 USDC", description: "Top Human Passport integration with embeds" },
+      { place: "Best Passport Integration #2", amount: "250 USDC", description: "Outstanding Passport integration" },
+      { place: "Best WaaP Integration #1", amount: "100 USDC", description: "Top WaaP wallet login flow" },
+      { place: "Best WaaP Integration #2", amount: "100 USDC", description: "Great WaaP wallet login flow" },
+      { place: "Best WaaP Integration #3", amount: "100 USDC", description: "Great WaaP wallet login flow" },
+      { place: "Best WaaP Integration #4", amount: "100 USDC", description: "Great WaaP wallet login flow" },
+      { place: "Best WaaP Integration #5", amount: "100 USDC", description: "Great WaaP wallet login flow" }
     ]
   },
   {
     title: "v0",
-    description: "Build with v0 and show the v0 branding on your site. Projects must be published as public templates in the v0 directory at https://v0.app/templates. Plus: 200 codes of $10 USD in v0 credits for VibeCoding workshop participants!",
+    description: "Build with v0 and show the v0 branding on your site. Projects must be published as public templates in the v0 directory at https://v0.app/templates. Plus: 200 codes of 10 USD in v0 credits for VibeCoding workshop participants!",
     available: true,
     logoLight: "/v0-logo-light.svg",
     logoDark: "/v0-logo-dark.svg",
     logoUrl: "https://v0.app",
-    prize: "$1,000 USD",
-    prizeDetails: "1st: $500 | 2nd: $300 | 3rd: $200 in v0 credits",
+    prize: "1,000 USD",
+    prizeDetails: "1st: 500 USD | 2nd: 300 USD | 3rd: 200 USD in v0 credits",
     prizeBreakdown: [
-      { place: "1st Place", amount: "$500 USD", description: "In v0 credits" },
-      { place: "2nd Place", amount: "$300 USD", description: "In v0 credits" },
-      { place: "3rd Place", amount: "$200 USD", description: "In v0 credits" },
-      { place: "Workshop Bonus", amount: "$10 USD each", description: "200 codes for VibeCoding workshop participants" }
+      { place: "1st Place", amount: "500 USD", description: "In v0 credits" },
+      { place: "2nd Place", amount: "300 USD", description: "In v0 credits" },
+      { place: "3rd Place", amount: "200 USD", description: "In v0 credits" },
+      { place: "Workshop Bonus", amount: "10 USD each", description: "200 codes for VibeCoding workshop participants" }
     ]
   },
 ] as const;
@@ -283,7 +293,7 @@ export const FAQ = [
   {
     question: "How do sponsor bounties work?",
     answer:
-      "Sponsor bounties are additional prizes for integrating specific technologies. Human.Tech offers $1,000 USDC: 2 prizes of $250 for best Human.Passport integrations (embeds) and 5 prizes of $100 for best WaaP wallet login flows. v0 offers $1,000 USD in credits (1st: $500, 2nd: $300, 3rd: $200), plus 200 codes of $10 USD for VibeCoding workshop participants. You can win prizes from both main tracks AND sponsor bounties!",
+      "Sponsor bounties are additional prizes for integrating specific technologies. Human.Tech offers 1,000 USDC: 2 prizes of 250 for best Human.Passport integrations (embeds) and 5 prizes of 100 for best WaaP wallet login flows. v0 offers 1,000 USD in credits (1st: 500, 2nd: 300, 3rd: 200), plus 200 codes of 10 USD for VibeCoding workshop participants. You can win prizes from both main tracks AND sponsor bounties!",
   },
   {
     question: "Do transactions on mainnet affect my chances of winning?",
