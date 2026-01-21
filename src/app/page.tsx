@@ -420,6 +420,49 @@ export default function Home() {
           </Container>
         </Section>
 
+        <Section id="mentorship" className="scroll-mt-20">
+          <Container>
+            <SectionHeader
+              title="Mentorship on demand."
+              description="Book time with the right mentor and share exactly what you need: Human.Tech (WaaP/Passport), v0, or Celo."
+            />
+
+            <div className="mt-8 grid gap-6 md:grid-cols-[1.1fr,0.9fr] items-start">
+              <Card className="p-7">
+                <div className="text-sm font-semibold text-foreground mb-4">How it works</div>
+                <ol className="space-y-3 text-sm text-black/70 dark:text-white/70 list-decimal list-inside">
+                  <li>We publish mentor availability in Calendly—pick any open slot.</li>
+                  <li>
+                    In the field <span className="font-semibold">“Please share anything that will help prepare for our meeting.”</span> specify your ask:
+                    “Human.Tech - WaaP login,” “Human.Tech - Passport embed,” “v0,” or “Celo (deploy/tx tuning).”
+                  </li>
+                  <li>Share links (repo, live URL, docs) so the mentor can prep.</li>
+                </ol>
+                <div className="mt-6">
+                  <SquaresButtonLink
+                    href="https://calendly.com/celolatamhubs/30min"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto"
+                  >
+                    Book a mentorship slot
+                  </SquaresButtonLink>
+                </div>
+              </Card>
+
+              <Card className="p-7">
+                <div className="text-sm font-semibold text-foreground mb-4">What to expect</div>
+                <ul className="space-y-3 text-sm text-black/70 dark:text-white/70 list-disc list-inside">
+                  <li>Sessions are 30 minutes and focused on your stated topic.</li>
+                  <li>We route your request to the right mentor (Human.Tech, v0, or Celo).</li>
+                  <li>Come with a clear ask and a short demo so we can go straight to solutions.</li>
+                  <li>Mainnet-ready guidance: deployments, tx volume strategies, and best practices.</li>
+                </ul>
+              </Card>
+            </div>
+          </Container>
+        </Section>
+
         <Section id="submit" className="scroll-mt-20">
           <Container>
             <SectionHeader
