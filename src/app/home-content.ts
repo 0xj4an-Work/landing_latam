@@ -14,6 +14,7 @@ export const NAV_LINKS = [
   { href: "#tracks", label: "Tracks" },
   { href: "#schedule", label: "Timeline" },
   { href: "#rules", label: "Rules" },
+  { href: "#mentorship", label: "Mentorship" },
   { href: "#submit", label: "Submit" },
   { href: "#resources", label: "Resources" },
   { href: "#prizes", label: "Prizes" },
