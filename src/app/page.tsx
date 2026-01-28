@@ -440,7 +440,7 @@ export default function Home() {
                 </ol>
                 <div className="mt-6">
                   <SquaresButtonLink
-                    href="https://calendly.com/celolatamhubs/30min"
+                    href="https://calendly.com/d/cyd8-hb2-r6r/buildathon-mentorship"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full sm:w-auto"
