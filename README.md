@@ -1,45 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LATAM Buildathon Landing Page
+
+Landing page and registration system for the LATAM Buildathon hackathon.
+
+## Features
+
+- Team registration with member details and country selection
+- Project submission with track selection (Open Track, MiniApps, Human.Tech, v0)
+- LATAM eligibility validation (>50% team members from Latin America)
+- Admin dashboard with:
+  - Team and submission management
+  - Filters by submission status and country
+  - CSV export with configurable fields
+  - Country statistics
 
 ## Stack
 
 - **Framework**: Next.js 16 + React 19 + TypeScript
+- **Database**: PostgreSQL with Prisma ORM
 - **Styling**: Tailwind CSS (v4, CSS-first)
 - **UI primitives**: Radix UI
-- **Dark mode**: `next-themes` (class-based; toggles the `dark` class on `<html>`)
+- **Dark mode**: `next-themes` (class-based)
 
 ## Getting Started
 
-First, run the development server:
-
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-If you are setting up the database locally, see `DATABASE_SETUP.md`.
+2. Set up environment variables:
+```bash
+cp .env.example .env
+```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Configure your `.env` file:
+```env
+DATABASE_URL="your-postgres-connection-string"
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="your-secure-password"
+ADMIN_SESSION_SECRET="your-random-secret-key"
+```
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+4. Set up the database:
+```bash
+npx prisma generate
+npx prisma db push
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-To learn more about Next.js, take a look at the following resources:
+## Database Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For local development setup, see [DATABASE_SETUP.md](DATABASE_SETUP.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+For Railway deployment, see [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md).
 
-## Deploy on Vercel
+## Admin Dashboard
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Access the admin dashboard at `/admin` (requires authentication).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Features:
+- View all registered teams and their members
+- Filter teams by submission status (submitted/not submitted)
+- Filter teams by country
+- Export data to CSV with selectable fields
+- Delete teams and submissions
+- View country statistics
+
+## Deployment
+
+See [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) for production deployment steps.
