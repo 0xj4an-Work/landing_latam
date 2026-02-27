@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SubmitButton from "@/components/submit/SubmitButton";
 
 const SUBMISSION_END_DATE = new Date("2026-02-27T23:59:59Z");
 
@@ -133,6 +134,16 @@ export function Countdown({ className }: { className?: string }) {
                 🇦🇷🇧🇷 8:59 PM
               </span>
             </div>
+          </div>
+
+          {/* Submit button */}
+          <div className="mt-6">
+            <SubmitButton
+              label="Submit now"
+              variant="primary"
+              withSquares
+              className="w-full sm:w-auto"
+            />
           </div>
         </div>
       </div>

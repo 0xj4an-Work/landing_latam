@@ -154,7 +154,11 @@ export default function Home() {
       </header>
 
       <main>
-        <Section className="pt-14 sm:pt-20">
+        <Container className="py-6">
+          <Countdown />
+        </Container>
+
+        <Section className="pt-8 sm:pt-12">
           <div className="relative overflow-hidden">
             <Container className="relative z-10">
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-[1.1fr,0.9fr] items-center lg:gap-12">
@@ -240,8 +244,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-
-              <Countdown className="mt-12" />
 
               <div className="mt-12 grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3">
                 <Stat label="Buildathon" value="Jan 19 → Feb 27, 2026" />
