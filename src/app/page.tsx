@@ -178,7 +178,6 @@ export default function Home() {
                       label="Pre-register now"
                       variant="primary"
                       withSquares
-                      autoOpen
                       className="shadow-lg shadow-[var(--celo-yellow)]/20"
                     />
                     <SquaresButtonLink variant="secondary" href="#schedule">
@@ -197,10 +196,22 @@ export default function Home() {
                       </span>
                     </ButtonLink>
                   </div>
+                </div>
 
-                  <Countdown className="mt-8" />
+                <div className="flex flex-col justify-center">
+                  <div className="relative w-full max-w-[520px] justify-self-end overflow-hidden rounded-3xl border border-black/10 bg-white/70 shadow-xl ring-1 ring-black/5 dark:border-white/10 dark:bg-white/[0.05] dark:ring-white/5 sm:mx-auto lg:mx-0 aspect-[16/9]">
+                    <Image
+                      src="/hero/latambuildathon.png"
+                      alt="Latam Buildathon visual"
+                      fill
+                      sizes="(min-width: 1024px) 560px, 100vw"
+                      className="object-contain"
+                      priority
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/10 dark:from-black/40 dark:via-black/25 dark:to-transparent" />
+                  </div>
 
-                  <div className="mt-8 pt-8 border-t border-black/10 dark:border-white/10">
+                  <div className="mt-6 max-w-[520px] sm:mx-auto lg:mx-0">
                     <div className="mb-2 text-xs font-medium text-black/60 dark:text-white/60">
                       Supported by regional communities
                     </div>
@@ -228,19 +239,9 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-
-                <div className="relative w-full max-w-[520px] justify-self-end overflow-hidden rounded-3xl border border-black/10 bg-white/70 shadow-xl ring-1 ring-black/5 dark:border-white/10 dark:bg-white/[0.05] dark:ring-white/5 sm:mx-auto lg:mx-0 self-center aspect-[16/9]">
-                  <Image
-                    src="/hero/latambuildathon.png"
-                    alt="Latam Buildathon visual"
-                    fill
-                    sizes="(min-width: 1024px) 560px, 100vw"
-                    className="object-contain"
-                    priority
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/10 dark:from-black/40 dark:via-black/25 dark:to-transparent" />
-                </div>
               </div>
+
+              <Countdown className="mt-12" />
 
               <div className="mt-12 grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3">
                 <Stat label="Buildathon" value="Jan 19 → Feb 27, 2026" />
