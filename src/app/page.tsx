@@ -198,6 +198,8 @@ export default function Home() {
                     </ButtonLink>
                   </div>
 
+                  <Countdown className="mt-8" />
+
                   <div className="mt-8 pt-8 border-t border-black/10 dark:border-white/10">
                     <div className="mb-2 text-xs font-medium text-black/60 dark:text-white/60">
                       Supported by regional communities
@@ -251,8 +253,6 @@ export default function Home() {
                 <Stat label="Human.Tech Bounty" value="1,000 USDC" />
                 <Stat label="v0 Bounty" value="1,000 Credits" />
               </div>
-
-              <Countdown className="mt-8" />
 
               <div className="mt-16 grid gap-6 sm:grid-cols-2">
                 <Card className="group rounded-2xl p-8 transition-all hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5">
