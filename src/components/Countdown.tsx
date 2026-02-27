@@ -116,6 +116,24 @@ export function Countdown({ className }: { className?: string }) {
           >
             Deadline: Feb 27, 2026 at 23:59:59 UTC
           </div>
+
+          {/* Compact timezone conversions */}
+          <div className="mt-4 pt-4 border-t border-amber-300/30 dark:border-amber-600/30">
+            <div className="text-[10px] sm:text-xs text-amber-700 dark:text-amber-300 mb-2">
+              In your timezone (approx):
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 text-[10px] sm:text-xs">
+              <span className="px-2 py-1 rounded bg-white/50 dark:bg-black/20 text-amber-800 dark:text-amber-200">
+                🇲🇽 5:59 PM
+              </span>
+              <span className="px-2 py-1 rounded bg-white/50 dark:bg-black/20 text-amber-800 dark:text-amber-200">
+                🇨🇴 6:59 PM
+              </span>
+              <span className="px-2 py-1 rounded bg-white/50 dark:bg-black/20 text-amber-800 dark:text-amber-200">
+                🇦🇷🇧🇷 8:59 PM
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

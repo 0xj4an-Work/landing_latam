@@ -384,7 +384,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
-                    ⏰ Important: All times are in UTC
+                    Important: All times are in UTC
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-amber-800 dark:text-amber-200">
                     <strong>UTC (Coordinated Universal Time)</strong> is the global time standard. All dates and deadlines for this buildathon are based on UTC to ensure fairness across all participating countries.
