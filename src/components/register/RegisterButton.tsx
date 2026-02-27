@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { useSubmissionDeadline } from "@/components/Countdown";
 import Squares from "@/components/home/Squares";
 import RegisterProjectModal from "@/components/register/RegisterProjectModal";
 import { cn } from "@/lib/cn";
@@ -23,22 +24,23 @@ export default function RegisterButton({
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
+  const { isExpired, mounted } = useSubmissionDeadline();
 
   React.useEffect(() => {
-    setMounted(true);
-    if (autoOpen) {
+    if (autoOpen && mounted && !isExpired) {
       // Small delay to ensure proper rendering
       const timer = setTimeout(() => setOpen(true), 100);
       return () => clearTimeout(timer);
     }
-  }, [autoOpen]);
+  }, [autoOpen, mounted, isExpired]);
 
   return (
     <>
       <Button
         variant={variant}
         size={size}
+        disabled={isExpired}
+        title={isExpired ? "Registration is closed. The buildathon has ended." : undefined}
         className={cn(
           withSquares ? "relative overflow-hidden" : null,
           withSquares && variant === "primary"
@@ -71,7 +73,7 @@ export default function RegisterButton({
           label
         )}
       </Button>
-      {mounted ? <RegisterProjectModal open={open} onOpenChange={setOpen} /> : null}
+      {mounted && !isExpired ? <RegisterProjectModal open={open} onOpenChange={setOpen} /> : null}
     </>
   );
 }

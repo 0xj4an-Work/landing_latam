@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { useSubmissionDeadline } from "@/components/Countdown";
 import Squares from "@/components/home/Squares";
 import SubmitModal from "@/components/submit/SubmitModal";
 import { cn } from "@/lib/cn";
@@ -21,17 +22,12 @@ export default function SubmitButton({
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { isExpired, mounted } = useSubmissionDeadline();
 
   // Check if current date is within the submission period (Jan 19 - Feb 27, 2026 UTC)
   const now = new Date();
   const startDate = new Date("2026-01-19T00:00:00Z");
-  const endDate = new Date("2026-02-27T23:59:59Z");
-  const isSubmissionPeriodActive = now >= startDate && now <= endDate;
+  const isSubmissionPeriodActive = now >= startDate && !isExpired;
 
   return (
     <>

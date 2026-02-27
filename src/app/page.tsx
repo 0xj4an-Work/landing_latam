@@ -10,6 +10,7 @@ import {
   StarIcon,
 } from "@radix-ui/react-icons";
 
+import { Countdown } from "@/components/Countdown";
 import { Faq } from "@/components/faq";
 import RegisterButton from "@/components/register/RegisterButton";
 import SubmitButton from "@/components/submit/SubmitButton";
@@ -250,6 +251,8 @@ export default function Home() {
                 <Stat label="Human.Tech Bounty" value="1,000 USDC" />
                 <Stat label="v0 Bounty" value="1,000 Credits" />
               </div>
+
+              <Countdown className="mt-8" />
 
               <div className="mt-16 grid gap-6 sm:grid-cols-2">
                 <Card className="group rounded-2xl p-8 transition-all hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5">

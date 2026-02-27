@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { useSubmissionDeadline } from "@/components/Countdown";
 import Squares from "@/components/home/Squares";
 import EditTeamModal from "./EditTeamModal";
 import { cn } from "@/lib/cn";
@@ -20,12 +21,12 @@ export default function EditTeamButton({
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
+  const { isExpired } = useSubmissionDeadline();
 
   // Check if current date is within the edit period (Dec 18, 2025 - Feb 27, 2026 UTC)
   const now = new Date();
   const startDate = new Date("2025-12-18T00:00:00Z");
-  const endDate = new Date("2026-02-27T23:59:59Z");
-  const isEditPeriodActive = now >= startDate && now <= endDate;
+  const isEditPeriodActive = now >= startDate && !isExpired;
 
   return (
     <>
